@@ -7,16 +7,24 @@ import (
 	"golang.org/x/xerrors"
 )
 
+var (
+	ErrNoUserData      = xerrors.New("no user data")
+	ErrNoHomeDirectory = xerrors.New("no home directory for user")
+)
+
 // Return a path constructed from the specified relative path and the user's home directory.
-func homePath(relPath string) (string, error) {
-	// NOTE: Error conditions not easily testable since os/user isn't an interface.
+func HomePath(relPath ...string) (string, error) {
 	usr, err := user.Current()
-	if err != nil || usr == nil {
-		return "", xerrors.Errorf("No user data getting home path: %w", err)
+	if err != nil {
+		// Use this error.
+	} else if usr == nil {
+		err = ErrNoUserData
+	} else if usr.HomeDir == "" {
+		err = ErrNoHomeDirectory
 	}
-	if usr.HomeDir == "" {
-		return "", xerrors.Errorf("No home directory for user: %w", err)
+	if err != nil {
+		return "", xerrors.Errorf("getting absolute path for ~/%s: %w", relPath, err)
 	}
 
-	return filepath.Join(usr.HomeDir, relPath), nil
+	return filepath.Join(append([]string{usr.HomeDir}, relPath...)...), nil
 }
