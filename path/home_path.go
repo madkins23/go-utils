@@ -21,7 +21,7 @@ var (
 )
 
 // HomePath returns a path constructed from the specified relative path and the user's home directory.
-// Consider using github.com/mitchellh/go-homedir as an alternative.
+// Consider using https://github.com/mitchellh/go-homedir as an alternative.
 func HomePath(relPath ...string) (string, error) {
 	usr, err := user.Current()
 	if err != nil {
