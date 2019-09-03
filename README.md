@@ -24,3 +24,4 @@ Text utilities.
 * `text.Pluralize()` makes a word singular or plural based on the specified count.
 Based on `github.com/gertd/go-pluralize` with hidden global pluralizer and
 simplified calling convention.
+* `text.JustAlphaNumeric()` filters non-alphanumeric characters out of a string.
