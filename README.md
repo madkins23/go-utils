@@ -17,6 +17,15 @@ Path utilities.
 * `path.HomePath()` prepends a relative file path with the user's home directory.
 Works on linux and should work on Mac and Windows but untested by author.
 
+## `test`
+
+Test utilities.
+
+* `test.CaptureStderr()` captures standard error over the execution
+of a provided test function and returns the text so captured.
+* `test.CaptureStdout()` captures standard output over the execution
+of a provided test function and returns the text so captured.
+
 ## `text`
 
 Text utilities.
