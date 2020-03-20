@@ -1,20 +1,20 @@
 package path
 
 import (
+	"errors"
+	"fmt"
 	"os/user"
 	"path/filepath"
-
-	"golang.org/x/xerrors"
 )
 
 var (
 	// ErrNoUserData is returned when no user data can be acquired via user.Current().
 	// This should never happen.
-	ErrNoUserData = xerrors.New("no user data")
+	ErrNoUserData = errors.New("no user data")
 
 	// ErrNoHomeDirectory is returned when there is no home directory for the user.
 	// This seems unlikely and will probably never happen.
-	ErrNoHomeDirectory = xerrors.New("no home directory for user")
+	ErrNoHomeDirectory = errors.New("no home directory for user")
 
 	// Since user.Current() is package level (i.e. there is no interface)
 	// it's pretty much impossible to test for these conditions.
@@ -32,7 +32,7 @@ func HomePath(relPath ...string) (string, error) {
 		err = ErrNoHomeDirectory
 	}
 	if err != nil {
-		return "", xerrors.Errorf("getting absolute path for ~/%s: %w", relPath, err)
+		return "", fmt.Errorf("getting absolute path for ~/%s: %w", relPath, err)
 	}
 
 	return filepath.Join(append([]string{usr.HomeDir}, relPath...)...), nil
