@@ -1,6 +1,6 @@
 module github.com/madkins23/go-utils
 
-go 1.12
+go 1.14
 
 require (
 	github.com/gertd/go-pluralize v0.1.0
