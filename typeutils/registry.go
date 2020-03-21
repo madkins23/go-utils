@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // Registry is the type registry interface.
@@ -66,7 +64,7 @@ type registration struct {
 func (reg *registry) Alias(alias string, example interface{}) error {
 	exampleType := reflect.TypeOf(example)
 	if exampleType == nil {
-		return errors.Errorf("no type for example %v", example)
+		return fmt.Errorf("no type for example %v", example)
 	}
 
 	pkgPath := exampleType.PkgPath()
@@ -87,12 +85,12 @@ func (reg *registry) Register(example interface{}) error {
 	// Get reflected type for example object.
 	exampleType := reflect.TypeOf(example)
 	if exampleType == nil {
-		return errors.Errorf("No reflected type for %v", example)
+		return fmt.Errorf("no reflected type for %v", example)
 	}
 
 	// Check for previous record.
 	if _, ok := reg.byType[exampleType]; ok {
-		return errors.Errorf("previous registration for type %v", exampleType)
+		return fmt.Errorf("previous registration for type %v", exampleType)
 	}
 
 	// Get type name without any pointer asterisks.
@@ -148,7 +146,7 @@ func (reg *registry) Register(example interface{}) error {
 func (reg *registry) Make(name string) (interface{}, error) {
 	item, found := reg.byName[name]
 	if !found {
-		return nil, errors.Errorf("no example for '%s'", name)
+		return nil, fmt.Errorf("no example for '%s'", name)
 	}
 
 	return reflect.Zero(item.typeObj).Interface(), nil
@@ -159,7 +157,7 @@ func (reg *registry) NameFor(item interface{}) (string, error) {
 	itemType := reflect.TypeOf(item)
 	registration, ok := reg.byType[itemType]
 	if !ok {
-		return "", errors.Errorf("no registration for type %s", itemType)
+		return "", fmt.Errorf("no registration for type %s", itemType)
 	}
 
 	return registration.defaultName, nil
@@ -168,17 +166,16 @@ func (reg *registry) NameFor(item interface{}) (string, error) {
 //////////////////////////////////////////////////////////////////////////
 
 func genNameFromInterface(example interface{}) (string, error) {
-	return genNameFromType(reflect.TypeOf(example))
-}
-
-func genNameFromType(itemType reflect.Type) (string, error) {
-	fmt.Printf("Path:  %s\nName:  %s\n", itemType.PkgPath(), itemType.Name())
+	itemType := reflect.TypeOf(example)
+	if itemType == nil {
+		return "", fmt.Errorf("no type for item %v", example)
+	}
 
 	path := itemType.PkgPath()
 	last := strings.LastIndex(path, "/")
 
 	if last < 0 {
-		return "", errors.Errorf("no slash in %s", path)
+		return "", fmt.Errorf("no slash in %s", path)
 	}
 
 	final := path[last:]
