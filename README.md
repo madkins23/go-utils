@@ -34,3 +34,16 @@ Text utilities.
 Based on `github.com/gertd/go-pluralize` with hidden global pluralizer and
 simplified calling convention.
 * `text.JustAlphaNumeric()` filters non-alphanumeric characters out of a string.
+
+## `typeutils`
+
+Type utilities.
+
+* `typeutils.Registry` provides a way to register types by name.
+Normally Go doesn't keep type names at runtime, so it must be done by the application.
+The `Registry` object provides a way to track this and to generate objects of a "named" type.
+Created for use in Marshaling/Unmarshaling objects.
+Uses reflection. Not thread-safe.
+
+* `typeutils.Registrar` provides a thread-safe `Registry`.
+`Registry` methods are wrapped with a mutex object.
