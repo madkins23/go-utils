@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	a        = alpha{what: "dunno"}
-	b        = bravo{ok: true}
+	a        = alpha{Name: "Hubert", Percent: 17.23}
+	b        = bravo{Finished: true, Iterations: 79}
 	c        = a
-	ai Actor = &a
-	bi Actor = &b
-	ci Actor = &c
+	ai actor = &a
+	bi actor = &b
+	ci actor = &c
 )
 
 //////////////////////////////////////////////////////////////////////////

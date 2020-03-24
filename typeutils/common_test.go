@@ -2,22 +2,32 @@ package typeutils
 
 import "fmt"
 
-type Actor interface {
+type actor interface {
 	declaim() string
 }
 
-type alpha struct {
-	what string
-}
+//////////////////////////////////////////////////////////////////////////
 
-type bravo struct {
-	ok bool
+type alpha struct {
+	Name    string
+	Percent float32 `yaml:"percentDone"`
+	extra   string
 }
 
 func (a *alpha) declaim() string {
-	return a.what
+	return fmt.Sprintf("%s is %6.2f%%  complete", a.Name, a.Percent)
+}
+
+type bravo struct {
+	Finished   bool
+	Iterations int
+	extra      string
 }
 
 func (b *bravo) declaim() string {
-	return fmt.Sprintf("OK:  %t", b.ok)
+	var finished string
+	if !b.Finished {
+		finished = "not "
+	}
+	return fmt.Sprintf("%sfinished after %d iterations", finished, b.Iterations)
 }
