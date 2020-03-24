@@ -34,9 +34,10 @@ func (suite *RegistryTestSuite) TestNewRegistry() {
 }
 
 func (suite *RegistryTestSuite) TestSimpleCases() {
-	example := alpha{}
+	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Register(example))
-	registration := suite.reg.byType[reflect.TypeOf(example)]
+	registration := suite.reg.byType[reflect.TypeOf(example).Elem()]
+	suite.Assert().NotNil(registration)
 	suite.Assert().Len(registration.allNames, 1)
 	name, err := suite.registry.NameFor(example)
 	suite.Assert().NoError(err)
@@ -48,10 +49,17 @@ func (suite *RegistryTestSuite) TestSimpleCases() {
 }
 
 func (suite *RegistryTestSuite) TestAliasCases() {
-	example := alpha{}
+	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Alias("test", example))
 	suite.Assert().NoError(suite.registry.Register(example))
-	registration := suite.reg.byType[reflect.TypeOf(example)]
+	exType := reflect.TypeOf(example)
+	if exType.Kind() == reflect.Ptr {
+		exType = exType.Elem()
+	}
+	registration, ok := suite.reg.byType[exType]
+	suite.Assert().True(ok)
+	suite.Assert().NotNil(registration)
+
 	suite.Assert().Len(registration.allNames, 2)
 	name, err := suite.registry.NameFor(example)
 	suite.Assert().NoError(err)

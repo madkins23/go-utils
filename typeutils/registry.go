@@ -66,43 +66,52 @@ type registration struct {
 
 // Alias creates an alias to be used to shorten names.
 // Use an empty string to remove a previous alias.
+// Alias must exist prior to registering applicable types.
+// Redefining a pre-existing alias is an error.
 func (reg *registry) Alias(alias string, example interface{}) error {
+	if _, ok := reg.aliases[alias]; ok {
+		return fmt.Errorf("unable to redefine alias %s", alias)
+	}
+
 	exampleType := reflect.TypeOf(example)
 	if exampleType == nil {
-		return fmt.Errorf("no type for example %v", example)
+		return fmt.Errorf("no type for alias %s (%v)", alias, example)
+	}
+
+	if exampleType.Kind() == reflect.Ptr {
+		exampleType = exampleType.Elem()
+		if exampleType == nil {
+			return fmt.Errorf("no elem type for alias %s (%v)", alias, example)
+		}
 	}
 
 	pkgPath := exampleType.PkgPath()
-	if pkgPath != "" {
-		reg.aliases[alias] = pkgPath
-	} else if _, ok := reg.aliases[alias]; ok {
-		delete(reg.aliases, alias)
+	if pkgPath == "" {
+		return fmt.Errorf("no package path for alias %s (%v)", alias, example)
 	}
 
-	// TODO: change all registration records to reflect change in alias?
-	// Could just assume all aliases are in place prior to registration.
-
+	reg.aliases[alias] = pkgPath
 	return nil
 }
 
 // Register a type by providing an example object.
 func (reg *registry) Register(example interface{}) error {
 	// Get reflected type for example object.
-	exampleType := reflect.TypeOf(example)
-	if exampleType == nil {
-		return fmt.Errorf("no reflected type for %v", example)
+	exType := reflect.TypeOf(example)
+	if exType != nil && exType.Kind() == reflect.Ptr {
+		exType = exType.Elem()
 	}
-	if exampleType.Kind() == reflect.Ptr {
-		exampleType = exampleType.Elem()
+	if exType == nil {
+		return fmt.Errorf("no reflected type for %v", example)
 	}
 
 	// Check for previous record.
-	if _, ok := reg.byType[exampleType]; ok {
-		return fmt.Errorf("previous registration for type %v", exampleType)
+	if _, ok := reg.byType[exType]; ok {
+		return fmt.Errorf("previous registration for type %v", exType)
 	}
 
 	// Get type name without any pointer asterisks.
-	typeName := exampleType.String()
+	typeName := exType.String()
 	if strings.HasPrefix(typeName, "*") {
 		typeName = strings.TrimLeft(typeName, "*")
 	}
@@ -111,7 +120,7 @@ func (reg *registry) Register(example interface{}) error {
 	item := &registration{
 		defaultName: typeName,
 		allNames:    make([]string, 1, len(reg.aliases)+1),
-		typeObj:     exampleType,
+		typeObj:     exType,
 	}
 
 	// Initialize default name to full name with package and type.
@@ -121,6 +130,8 @@ func (reg *registry) Register(example interface{}) error {
 		return err
 	}
 	item.allNames[0] = item.defaultName
+
+	fmt.Printf("There are %d aliases\n", len(reg.aliases))
 
 	// Look for any possible aliases for the type and add them to the list of all names.
 	for alias, prefixPath := range reg.aliases {
@@ -144,9 +155,24 @@ func (reg *registry) Register(example interface{}) error {
 	}
 
 	// Add type lookup.
-	reg.byType[exampleType] = item
+	reg.byType[exType] = item
 
 	return nil
+}
+
+// NameFor returns a name for the specified object.
+func (reg *registry) NameFor(item interface{}) (string, error) {
+	itemType := reflect.TypeOf(item)
+	if itemType.Kind() == reflect.Ptr {
+		itemType = itemType.Elem()
+	}
+
+	registration, ok := reg.byType[itemType]
+	if !ok {
+		return "", fmt.Errorf("no registration for type %s", itemType)
+	}
+
+	return registration.defaultName, nil
 }
 
 // Make creates a new instance of the example object with the specified name.
@@ -158,17 +184,6 @@ func (reg *registry) Make(name string) (interface{}, error) {
 	}
 
 	return reflect.New(item.typeObj).Interface(), nil
-}
-
-// NameFor returns a name for the specified object.
-func (reg *registry) NameFor(item interface{}) (string, error) {
-	itemType := reflect.TypeOf(item)
-	registration, ok := reg.byType[itemType]
-	if !ok {
-		return "", fmt.Errorf("no registration for type %s", itemType)
-	}
-
-	return registration.defaultName, nil
 }
 
 // marshalYAML converts a registry typed item into a map for further processing.
