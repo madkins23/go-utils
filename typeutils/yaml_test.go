@@ -29,7 +29,7 @@ func init() {
 }
 
 func (suite *YamlTestSuite) SetupTest() {
-	suite.film = newFilmYaml()
+	suite.film = &filmYaml{Index: make(map[string]actor)}
 	suite.film.Lead = &alpha{Name: "Goober", Percent: 13.23}
 	suite.film.addActor("Goober", suite.film.Lead)
 	suite.film.addActor("Snoofus", &bravo{Finished: false, Iterations: 17, extra: "stuff"})
@@ -57,10 +57,6 @@ func (dir *filmYaml) addActor(name string, act actor) {
 	dir.Index[name] = act
 }
 
-func newFilmYaml() *filmYaml {
-	return &filmYaml{Index: make(map[string]actor)}
-}
-
 func (dir *filmYaml) MarshalYAML() (interface{}, error) {
 	var err error
 
@@ -86,35 +82,6 @@ func (dir *filmYaml) MarshalYAML() (interface{}, error) {
 	result["index"] = index
 
 	return result, nil
-}
-
-func unmarshalActor(value *yaml.Node) (actor, error) {
-	if value.Kind != yaml.MappingNode {
-		return nil, fmt.Errorf("not a mapping node for actor")
-	}
-
-	var err error
-	var mapped map[string]interface{}
-	if err = value.Decode(&mapped); err != nil {
-		return nil, fmt.Errorf("unable to decode actor map: %w", err)
-	}
-
-	var mud interface{}
-	if mud, err = testRegistry.MapToItem(mapped); err != nil {
-		return nil, fmt.Errorf("unable to map to actor: %w", err)
-	}
-
-	var act actor
-	var ok bool
-	if act, ok = mud.(actor); !ok {
-		return nil, fmt.Errorf("unable to convert %v to actor", reflect.TypeOf(mud).Name())
-	}
-
-	if err = value.Decode(act); err != nil {
-		return nil, fmt.Errorf("unable to decode actor: %w", err)
-	}
-
-	return act, nil
 }
 
 func (dir *filmYaml) UnmarshalYAML(value *yaml.Node) error {
@@ -151,6 +118,38 @@ func (dir *filmYaml) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	return nil
+}
+
+func unmarshalActor(value *yaml.Node) (actor, error) {
+	if value.Kind != yaml.MappingNode {
+		return nil, fmt.Errorf("not a mapping node for actor")
+	}
+
+	var err error
+	var item interface{}
+	for i := 0; i < len(value.Content); i += 2 {
+		if value.Content[i].Value == TypeField {
+			typeName := value.Content[i+1].Value
+			if item, err = testRegistry.Make(typeName); err != nil {
+				return nil, fmt.Errorf("unable to make registry instance %s: %w", typeName, err)
+			}
+		}
+	}
+	if item == nil {
+		return nil, fmt.Errorf("no type field for actor node")
+	}
+
+	var act actor
+	var ok bool
+	if act, ok = item.(actor); !ok {
+		return nil, fmt.Errorf("unable to convert %v to actor", reflect.TypeOf(item).Name())
+	}
+
+	if err = value.Decode(act); err != nil {
+		return nil, fmt.Errorf("unable to decode actor: %w", err)
+	}
+
+	return act, nil
 }
 
 //////////////////////////////////////////////////////////////////////////

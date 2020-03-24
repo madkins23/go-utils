@@ -19,7 +19,7 @@ type Registry interface {
 	Make(name string) (interface{}, error)
 	NameFor(item interface{}) (string, error)
 	ItemToMap(item interface{}) (map[string]interface{}, error)
-	MapToItem(map[string]interface{}) (interface{}, error)
+	//MapToItem(map[string]interface{}) (interface{}, error)
 }
 
 // NewRegistry creates a new Registry object of the default internal type.
@@ -252,6 +252,7 @@ func copyFieldsToMap(value reflect.Value, result map[string]interface{}) error {
 	return nil
 }
 
+/*
 // MapToItem attempts to return a new item of the type specified in the map.
 // An error is returned if this is impossible.
 func (reg *registry) MapToItem(in map[string]interface{}) (interface{}, error) {
@@ -275,6 +276,7 @@ func (reg *registry) MapToItem(in map[string]interface{}) (interface{}, error) {
 
 	return item, nil
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////
 
