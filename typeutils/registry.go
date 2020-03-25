@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"unicode"
 )
 
 const TypeField = "$type$"
+
+type FromMapFn func(from map[string]interface{}, to interface{}) error
+type ToMapFn func(from interface{}, to map[string]interface{}) error
 
 // Registry is the type registry interface.
 // A type registry tracks specific types by name, a facility not native to Go.
@@ -18,8 +20,8 @@ type Registry interface {
 	Register(example interface{}) error
 	Make(name string) (interface{}, error)
 	NameFor(item interface{}) (string, error)
-	ItemToMap(item interface{}) (map[string]interface{}, error)
-	//MapToItem(map[string]interface{}) (interface{}, error)
+	ItemToMap(item interface{}, toMapFn ToMapFn) (map[string]interface{}, error)
+	MapToItem(in map[string]interface{}, fromMapFn FromMapFn) (interface{}, error)
 }
 
 // NewRegistry creates a new Registry object of the default internal type.
@@ -188,7 +190,7 @@ func (reg *registry) Make(name string) (interface{}, error) {
 
 // marshalYAML converts a registry typed item into a map for further processing.
 // If the item is not of a Registry type an error is returned.
-func (reg *registry) ItemToMap(item interface{}) (map[string]interface{}, error) {
+func (reg *registry) ItemToMap(item interface{}, toMapFn ToMapFn) (map[string]interface{}, error) {
 	value := reflect.ValueOf(item)
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -209,53 +211,19 @@ func (reg *registry) ItemToMap(item interface{}) (map[string]interface{}, error)
 	// This should work with both JSON and YAML.
 	result[TypeField] = registration.defaultName
 
-	if err := copyFieldsToMap(value, result); err != nil {
-		return nil, fmt.Errorf(": %w", err)
+	if toMapFn != nil {
+		// Use function pointer to copy fields to map.
+		if err := toMapFn(item, result); err != nil {
+			return nil, fmt.Errorf("unable to copy from item to map: %w", err)
+		}
 	}
 
 	return result, nil
 }
 
-func copyFieldsToMap(value reflect.Value, result map[string]interface{}) error {
-	valueType := value.Type()
-
-	for i := 0; i < value.NumField(); i++ {
-		field := valueType.Field(i)
-
-		if field.Anonymous {
-			if subValue := value.Field(i); subValue.Type().Kind() == reflect.Struct {
-				// Process anonymous sub-structs as if they were part of this item.
-				if err := copyFieldsToMap(subValue, result); err != nil {
-					return err
-				}
-			}
-		} else if unicode.IsUpper(rune(field.Name[0])) {
-			fieldName := field.Name
-			tagValue := field.Tag.Get("yaml")
-			if tagValue == "" {
-				fieldName = strings.ToLower(fieldName)
-			} else if tagFields := strings.Split(tagValue, ","); len(tagFields) > 0 {
-				if tagFields[0] != "" {
-					fieldName = tagFields[0]
-				}
-
-				// TODO: other tag fields?
-			}
-
-			fld := value.Field(i)
-			if fld.Interface() != nil {
-				result[fieldName] = fld.Interface()
-			}
-		}
-	}
-
-	return nil
-}
-
-/*
 // MapToItem attempts to return a new item of the type specified in the map.
 // An error is returned if this is impossible.
-func (reg *registry) MapToItem(in map[string]interface{}) (interface{}, error) {
+func (reg *registry) MapToItem(in map[string]interface{}, fromMapFn FromMapFn) (interface{}, error) {
 	typeField, found := in[TypeField]
 	if !found {
 		_ = fmt.Errorf("unable to find type for object")
@@ -270,13 +238,14 @@ func (reg *registry) MapToItem(in map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("unable to make item of type %s", typeField)
 	}
 
-	// TODO: should initialization from map occur here?
-	// Apparently not, since this would require knowing about JSON/YAML here.
-	// Could, however, use a function pointer,
+	if fromMapFn != nil {
+		if err := fromMapFn(in, item); err != nil {
+			return nil, fmt.Errorf("unable to copy map to item: %w", err)
+		}
+	}
 
 	return item, nil
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////
 

@@ -2,7 +2,6 @@ package typeutils
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -72,33 +71,25 @@ func (film *filmYaml) MarshalYAML() (interface{}, error) {
 		Name: film.Name,
 	}
 
-	if convert.Lead, err = film.marshalActor(film.Lead); err != nil {
+	if convert.Lead, err = testRegistryYaml.ItemToMap(film.Lead, toMapYaml); err != nil {
 		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
 	}
 
 	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
-		if convert.Cast[i], err = film.marshalActor(member); err != nil {
+		if convert.Cast[i], err = testRegistryYaml.ItemToMap(member, toMapYaml); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
 
 	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
-		if convert.Index[key], err = film.marshalActor(member); err != nil {
+		if convert.Index[key], err = testRegistryYaml.ItemToMap(member, toMapYaml); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
 
 	return convert, nil
-}
-
-func (film *filmYaml) marshalActor(act actor) (interface{}, error) {
-	if result, err := testRegistryYaml.ItemToMap(act); err != nil {
-		return nil, fmt.Errorf("unable to get type name for actor %v: %w", act, err)
-	} else {
-		return result, nil
-	}
 }
 
 func (film *filmYaml) UnmarshalYAML(value *yaml.Node) error {
@@ -147,31 +138,38 @@ func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 		return nil, fmt.Errorf("not a mapping node for actor")
 	}
 
-	var err error
-	var item interface{}
-	for i := 0; i < len(value.Content); i += 2 {
-		if value.Content[i].Value == TypeField {
-			typeName := value.Content[i+1].Value
-			if item, err = testRegistryYaml.Make(typeName); err != nil {
-				return nil, fmt.Errorf("unable to make registry instance %s: %w", typeName, err)
-			}
-		}
-	}
-	if item == nil {
-		return nil, fmt.Errorf("no type field for actor node")
+	var mapped map[string]interface{}
+	if err := value.Decode(&mapped); err != nil {
+		return nil, fmt.Errorf("unable to decode to map: %w", err)
 	}
 
-	var act actor
-	var ok bool
-	if act, ok = item.(actor); !ok {
-		return nil, fmt.Errorf("unable to convert %v to actor", reflect.TypeOf(item).Name())
+	if item, err := testRegistryYaml.MapToItem(mapped, fromMapYaml); err != nil {
+		return nil, fmt.Errorf("unable to map %v to item: %w", mapped, err)
+	} else if act, ok := item.(actor); !ok {
+		return nil, fmt.Errorf("item %v is not an actor", item)
+	} else {
+		return act, nil
+	}
+}
+
+func fromMapYaml(from map[string]interface{}, to interface{}) error {
+	if bytes, err := yaml.Marshal(from); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", from, err)
+	} else if err = yaml.Unmarshal(bytes, to); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
 	}
 
-	if err = value.Decode(act); err != nil {
-		return nil, fmt.Errorf("unable to decode actor: %w", err)
+	return nil
+}
+
+func toMapYaml(from interface{}, to map[string]interface{}) error {
+	if bytes, err := yaml.Marshal(from); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", from, err)
+	} else if err = yaml.Unmarshal(bytes, to); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
 	}
 
-	return act, nil
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////

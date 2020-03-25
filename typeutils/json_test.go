@@ -3,11 +3,9 @@ package typeutils
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/yaml.v3"
 )
 
 type JsonTestSuite struct {
@@ -45,13 +43,20 @@ func TestJsonSuite(t *testing.T) {
 //////////////////////////////////////////////////////////////////////////
 
 type filmJson struct {
-	json.Marshaler
-	json.Unmarshaler
+	json.Marshaler   `json:",omitempty"`
+	json.Unmarshaler `json:",omitempty"`
 
 	Name  string
 	Lead  actor
 	Cast  []actor
 	Index map[string]actor
+}
+
+type filmJsonConvert struct {
+	Name  string
+	Lead  interface{}
+	Cast  []interface{}
+	Index map[string]interface{}
 }
 
 func (film *filmJson) addActor(name string, act actor) {
@@ -62,106 +67,95 @@ func (film *filmJson) addActor(name string, act actor) {
 func (film *filmJson) MarshalJSON() ([]byte, error) {
 	var err error
 
-	result := make(map[string]interface{})
-	if result["lead"], err = testRegistryJson.ItemToMap(film.Lead); err != nil {
+	convert := filmJsonConvert{
+		Name: film.Name,
+	}
+
+	if convert.Lead, err = testRegistryJson.ItemToMap(film.Lead, toMapJson); err != nil {
 		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
 	}
 
-	cast := make([]map[string]interface{}, len(film.Cast))
+	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
-		if cast[i], err = testRegistryJson.ItemToMap(member); err != nil {
+		if convert.Cast[i], err = testRegistryJson.ItemToMap(member, toMapJson); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
-	result["cast"] = cast
 
-	index := make(map[string]map[string]interface{}, len(film.Index))
+	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
-		if index[key], err = testRegistryJson.ItemToMap(member); err != nil {
+		if convert.Index[key], err = testRegistryJson.ItemToMap(member, toMapJson); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
-	result["index"] = index
 
-	return json.Marshal(result)
+	return json.Marshal(convert)
 }
 
 func (film *filmJson) UnmarshalJSON(input []byte) error {
-	type filmJsonStruct struct {
-	}
+	var err error
 
-	var parse filmJsonStruct
-	if err := json.Unmarshal(input, parse); err != nil {
+	convert := filmJsonConvert{}
+	if err = json.Unmarshal(input, &convert); err != nil {
 		return fmt.Errorf("unable to unmarshal input JSON into struct: %w", err)
 	}
 
-	/*
-		if value.Kind != yaml.MappingNode {
-			return fmt.Errorf("not a mapping node for filmYaml")
-		}
+	film.Name = convert.Name
 
-		for i := 0; i < len(value.Content); i += 2 {
-			var err error
-			key := value.Content[i].Value
-			val := value.Content[i+1]
-			switch key {
-			case "lead":
-				if film.Lead, err = film.unmarshalActor(val); err != nil {
-					return err
-				}
-			case "cast":
-				film.Cast = make([]actor, len(val.Content))
-				for i, node := range val.Content {
-					if film.Cast[i], err = film.unmarshalActor(node); err != nil {
-						return err
-					}
-				}
-			case "index":
-				film.Index = make(map[string]actor, len(val.Content)/2)
-				for i := 0; i < len(val.Content); i += 2 {
-					if film.Index[val.Content[i].Value], err = film.unmarshalActor(val.Content[i+1]); err != nil {
-						return err
-					}
-				}
-			default:
-				return fmt.Errorf("unexpected film field: %s", key)
-			}
+	if film.Lead, err = film.unmarshalActor(convert.Lead); err != nil {
+		return fmt.Errorf("unable to unmarshal lead actor: %w", err)
+	}
+
+	film.Cast = make([]actor, len(convert.Cast))
+	for i, member := range convert.Cast {
+		if film.Cast[i], err = film.unmarshalActor(member); err != nil {
+			return fmt.Errorf("unable to unmarshal cast member: %w", err)
 		}
-	*/
+	}
+
+	film.Index = make(map[string]actor, len(convert.Index))
+	for name, member := range convert.Index {
+		if film.Index[name], err = film.unmarshalActor(member); err != nil {
+			return fmt.Errorf("unable to unmarshal index member: %w", err)
+		}
+	}
 
 	return nil
 }
 
-func (film *filmJson) unmarshalActor(value *yaml.Node) (actor, error) {
-	if value.Kind != yaml.MappingNode {
-		return nil, fmt.Errorf("not a mapping node for actor")
+func (film *filmJson) unmarshalActor(input interface{}) (actor, error) {
+	actMap, ok := input.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("actor input should be map")
 	}
 
-	var err error
-	var item interface{}
-	for i := 0; i < len(value.Content); i += 2 {
-		if value.Content[i].Value == TypeField {
-			typeName := value.Content[i+1].Value
-			if item, err = testRegistryJson.Make(typeName); err != nil {
-				return nil, fmt.Errorf("unable to make registry instance %s: %w", typeName, err)
-			}
-		}
+	if item, err := testRegistryJson.MapToItem(actMap, fromMapJson); err != nil {
+		return nil, fmt.Errorf("unable to map to item: %w", err)
+	} else if act, ok := item.(actor); !ok {
+		return nil, fmt.Errorf("item is not an actor")
+	} else {
+		return act, nil
 	}
-	if item == nil {
-		return nil, fmt.Errorf("no type field for actor node")
+}
+
+func fromMapJson(from map[string]interface{}, to interface{}) error {
+	if bytes, err := json.Marshal(from); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", from, err)
+	} else if err = json.Unmarshal(bytes, &to); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
 	}
 
-	var act actor
-	var ok bool
-	if act, ok = item.(actor); !ok {
-		return nil, fmt.Errorf("unable to convert %v to actor", reflect.TypeOf(item).Name())
+	return nil
+}
+
+func toMapJson(from interface{}, to map[string]interface{}) error {
+	if bytes, err := json.Marshal(from); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", from, err)
+	} else if err = json.Unmarshal(bytes, &to); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
 	}
 
-	if err = value.Decode(act); err != nil {
-		return nil, fmt.Errorf("unable to decode actor: %w", err)
-	}
-
-	return act, nil
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -182,21 +176,19 @@ func (suite *JsonTestSuite) TestExample() {
 }
 
 func (suite *JsonTestSuite) TestMarshal() {
-	/*
-		bytes, err := yaml.Marshal(suite.film)
-		suite.Assert().NoError(err)
-		fmt.Println(string(bytes))
-		var film filmJson
-		suite.Assert().NoError(yaml.Unmarshal(bytes, &film))
-		suite.Assert().NotEqual(suite.film, &film) // fails due to unexported field 'extra'
-		for _, act := range suite.film.Cast {
-			// Remove unexported field.
-			if alf, ok := act.(*alpha); ok {
-				alf.extra = ""
-			} else if bra, ok := act.(*bravo); ok {
-				bra.extra = ""
-			}
+	bytes, err := json.Marshal(suite.film)
+	suite.Assert().NoError(err)
+	fmt.Println(string(bytes))
+	var film filmJson
+	suite.Assert().NoError(json.Unmarshal(bytes, &film))
+	suite.Assert().NotEqual(suite.film, &film) // fails due to unexported field 'extra'
+	for _, act := range suite.film.Cast {
+		// Remove unexported field.
+		if alf, ok := act.(*alpha); ok {
+			alf.extra = ""
+		} else if bra, ok := act.(*bravo); ok {
+			bra.extra = ""
 		}
-		suite.Assert().Equal(suite.film, &film) // succeeds now that unexported fields are gone.
-	*/
+	}
+	suite.Assert().Equal(suite.film, &film) // succeeds now that unexported fields are gone.
 }
