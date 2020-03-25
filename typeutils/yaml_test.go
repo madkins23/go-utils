@@ -14,22 +14,22 @@ type YamlTestSuite struct {
 	film *filmYaml
 }
 
-var testRegistry = NewRegistry()
+var testRegistryYaml = NewRegistry()
 
 func init() {
-	if err := testRegistry.Alias("test", filmYaml{}); err != nil {
+	if err := testRegistryYaml.Alias("test", filmYaml{}); err != nil {
 		fmt.Printf("*** Error creating alias: %s\n", err)
 	}
-	if err := testRegistry.Register(&alpha{}); err != nil {
+	if err := testRegistryYaml.Register(&alpha{}); err != nil {
 		fmt.Printf("*** Error registering alpha: %s\n", err)
 	}
-	if err := testRegistry.Register(&bravo{}); err != nil {
+	if err := testRegistryYaml.Register(&bravo{}); err != nil {
 		fmt.Printf("*** Error registering bravo: %s\n", err)
 	}
 }
 
 func (suite *YamlTestSuite) SetupTest() {
-	suite.film = &filmYaml{Index: make(map[string]actor)}
+	suite.film = &filmYaml{Name: "Test YAML", Index: make(map[string]actor)}
 	suite.film.Lead = &alpha{Name: "Goober", Percent: 13.23}
 	suite.film.addActor("Goober", suite.film.Lead)
 	suite.film.addActor("Snoofus", &bravo{Finished: false, Iterations: 17, extra: "stuff"})
@@ -47,47 +47,71 @@ type filmYaml struct {
 	yaml.Marshaler
 	yaml.Unmarshaler
 
+	Name  string
 	Lead  actor
 	Cast  []actor
 	Index map[string]actor
 }
 
-func (dir *filmYaml) addActor(name string, act actor) {
-	dir.Cast = append(dir.Cast, act)
-	dir.Index[name] = act
+type filmYamlConvert struct {
+	Name  string
+	Lead  interface{}
+	Cast  []interface{}
+	Index map[string]interface{}
 }
 
-func (dir *filmYaml) MarshalYAML() (interface{}, error) {
+func (film *filmYaml) addActor(name string, act actor) {
+	film.Cast = append(film.Cast, act)
+	film.Index[name] = act
+}
+
+func (film *filmYaml) MarshalYAML() (interface{}, error) {
 	var err error
 
-	result := make(map[string]interface{})
-	if result["lead"], err = testRegistry.ItemToMap(dir.Lead); err != nil {
+	convert := filmYamlConvert{
+		Name: film.Name,
+	}
+
+	if convert.Lead, err = film.marshalActor(film.Lead); err != nil {
 		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
 	}
 
-	cast := make([]map[string]interface{}, len(dir.Cast))
-	for i, member := range dir.Cast {
-		if cast[i], err = testRegistry.ItemToMap(member); err != nil {
+	convert.Cast = make([]interface{}, len(film.Cast))
+	for i, member := range film.Cast {
+		if convert.Cast[i], err = film.marshalActor(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
-	result["cast"] = cast
 
-	index := make(map[string]map[string]interface{}, len(dir.Index))
-	for key, member := range dir.Index {
-		if index[key], err = testRegistry.ItemToMap(member); err != nil {
+	convert.Index = make(map[string]interface{}, len(film.Index))
+	for key, member := range film.Index {
+		if convert.Index[key], err = film.marshalActor(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
-	result["index"] = index
 
-	return result, nil
+	return convert, nil
 }
 
-func (dir *filmYaml) UnmarshalYAML(value *yaml.Node) error {
+func (film *filmYaml) marshalActor(act actor) (interface{}, error) {
+	if result, err := testRegistryYaml.ItemToMap(act); err != nil {
+		return nil, fmt.Errorf("unable to get type name for actor %v: %w", act, err)
+	} else {
+		return result, nil
+	}
+}
+
+func (film *filmYaml) UnmarshalYAML(value *yaml.Node) error {
 	if value.Kind != yaml.MappingNode {
 		return fmt.Errorf("not a mapping node for filmYaml")
 	}
+
+	convert := filmYamlConvert{}
+	if err := value.Decode(&convert); err != nil {
+		return fmt.Errorf("unable to decode value to conversion struct: %w", err)
+	}
+
+	film.Name = convert.Name
 
 	for i := 0; i < len(value.Content); i += 2 {
 		var err error
@@ -95,32 +119,30 @@ func (dir *filmYaml) UnmarshalYAML(value *yaml.Node) error {
 		val := value.Content[i+1]
 		switch key {
 		case "lead":
-			if dir.Lead, err = unmarshalActor(val); err != nil {
+			if film.Lead, err = film.unmarshalActor(val); err != nil {
 				return err
 			}
 		case "cast":
-			dir.Cast = make([]actor, len(val.Content))
+			film.Cast = make([]actor, len(val.Content))
 			for i, node := range val.Content {
-				if dir.Cast[i], err = unmarshalActor(node); err != nil {
+				if film.Cast[i], err = film.unmarshalActor(node); err != nil {
 					return err
 				}
 			}
 		case "index":
-			dir.Index = make(map[string]actor, len(val.Content)/2)
+			film.Index = make(map[string]actor, len(val.Content)/2)
 			for i := 0; i < len(val.Content); i += 2 {
-				if dir.Index[val.Content[i].Value], err = unmarshalActor(val.Content[i+1]); err != nil {
+				if film.Index[val.Content[i].Value], err = film.unmarshalActor(val.Content[i+1]); err != nil {
 					return err
 				}
 			}
-		default:
-			return fmt.Errorf("unexpected film field: %s", key)
 		}
 	}
 
 	return nil
 }
 
-func unmarshalActor(value *yaml.Node) (actor, error) {
+func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 	if value.Kind != yaml.MappingNode {
 		return nil, fmt.Errorf("not a mapping node for actor")
 	}
@@ -130,7 +152,7 @@ func unmarshalActor(value *yaml.Node) (actor, error) {
 	for i := 0; i < len(value.Content); i += 2 {
 		if value.Content[i].Value == TypeField {
 			typeName := value.Content[i+1].Value
-			if item, err = testRegistry.Make(typeName); err != nil {
+			if item, err = testRegistryYaml.Make(typeName); err != nil {
 				return nil, fmt.Errorf("unable to make registry instance %s: %w", typeName, err)
 			}
 		}
@@ -161,12 +183,15 @@ func (suite *YamlTestSuite) TestExample() {
 		F int `yaml:"a,omitempty"`
 		B int
 	}
-	var t T
-	suite.Assert().NoError(yaml.Unmarshal([]byte("a: 1\nb: 2"), &t))
-	suite.Assert().Equal(T{F: 1, B: 2}, t)
+	t := T{F: 1, B: 2}
+	bytes, err := yaml.Marshal(t)
+	suite.Assert().NoError(err)
+	var x T
+	suite.Assert().NoError(yaml.Unmarshal(bytes, &x))
+	suite.Assert().Equal(t, x)
 }
 
-func (suite *YamlTestSuite) TestMarshal() {
+func (suite *YamlTestSuite) TestCycle() {
 	bytes, err := yaml.Marshal(suite.film)
 	suite.Assert().NoError(err)
 	fmt.Println(string(bytes))
