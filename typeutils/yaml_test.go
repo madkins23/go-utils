@@ -79,20 +79,20 @@ func (film *filmYaml) MarshalYAML() (interface{}, error) {
 	}
 
 	if convert.Lead, err = testRegistryYaml.ConvertItemToMap(film.Lead); err != nil {
-		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
+		return nil, fmt.Errorf("converting lead to map: %w", err)
 	}
 
 	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
 		if convert.Cast[i], err = testRegistryYaml.ConvertItemToMap(member); err != nil {
-			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
+			return nil, fmt.Errorf("converting cast member to map: %w", err)
 		}
 	}
 
 	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
 		if convert.Index[key], err = testRegistryYaml.ConvertItemToMap(member); err != nil {
-			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
+			return nil, fmt.Errorf("converting cast member to map: %w", err)
 		}
 	}
 
@@ -106,7 +106,7 @@ func (film *filmYaml) UnmarshalYAML(value *yaml.Node) error {
 
 	convert := filmYamlConvert{}
 	if err := value.Decode(&convert); err != nil {
-		return fmt.Errorf("unable to decode value to conversion struct: %w", err)
+		return fmt.Errorf("decoding value to conversion struct: %w", err)
 	}
 
 	film.Name = convert.Name
@@ -147,11 +147,11 @@ func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 
 	var mapped map[string]interface{}
 	if err := value.Decode(&mapped); err != nil {
-		return nil, fmt.Errorf("unable to decode to map: %w", err)
+		return nil, fmt.Errorf("decoding to map: %w", err)
 	}
 
 	if item, err := testRegistryYaml.CreateItemFromMap(mapped); err != nil {
-		return nil, fmt.Errorf("unable to map %v to item: %w", mapped, err)
+		return nil, fmt.Errorf("creating item from map %v: %w", mapped, err)
 	} else if act, ok := item.(actor); !ok {
 		return nil, fmt.Errorf("item %v is not an actor", item)
 	} else {
@@ -161,9 +161,9 @@ func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 
 func copyViaYaml(dest, src interface{}) error {
 	if bytes, err := yaml.Marshal(src); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", src, err)
+		return fmt.Errorf("marshaling from %v: %w", src, err)
 	} else if err = yaml.Unmarshal(bytes, dest); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", dest, err)
+		return fmt.Errorf("unmarshaling to %v: %w", dest, err)
 	}
 
 	return nil

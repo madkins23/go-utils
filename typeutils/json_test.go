@@ -81,20 +81,20 @@ func (film *filmJson) MarshalJSON() ([]byte, error) {
 	}
 
 	if convert.Lead, err = testRegistryJson.ConvertItemToMap(film.Lead); err != nil {
-		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
+		return nil, fmt.Errorf("converting lead to map: %w", err)
 	}
 
 	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
 		if convert.Cast[i], err = testRegistryJson.ConvertItemToMap(member); err != nil {
-			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
+			return nil, fmt.Errorf("converting cast member to map: %w", err)
 		}
 	}
 
 	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
 		if convert.Index[key], err = testRegistryJson.ConvertItemToMap(member); err != nil {
-			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
+			return nil, fmt.Errorf("converting cast member to map: %w", err)
 		}
 	}
 
@@ -106,26 +106,26 @@ func (film *filmJson) UnmarshalJSON(input []byte) error {
 
 	convert := filmJsonConvert{}
 	if err = json.Unmarshal(input, &convert); err != nil {
-		return fmt.Errorf("unable to unmarshal input JSON into struct: %w", err)
+		return fmt.Errorf("unmarshaling input JSON into struct: %w", err)
 	}
 
 	film.Name = convert.Name
 
 	if film.Lead, err = film.unmarshalActor(convert.Lead); err != nil {
-		return fmt.Errorf("unable to unmarshal lead actor: %w", err)
+		return fmt.Errorf("unmarshaling lead actor: %w", err)
 	}
 
 	film.Cast = make([]actor, len(convert.Cast))
 	for i, member := range convert.Cast {
 		if film.Cast[i], err = film.unmarshalActor(member); err != nil {
-			return fmt.Errorf("unable to unmarshal cast member: %w", err)
+			return fmt.Errorf("unmarshaling cast member: %w", err)
 		}
 	}
 
 	film.Index = make(map[string]actor, len(convert.Index))
 	for name, member := range convert.Index {
 		if film.Index[name], err = film.unmarshalActor(member); err != nil {
-			return fmt.Errorf("unable to unmarshal index member: %w", err)
+			return fmt.Errorf("unmarshaling index member: %w", err)
 		}
 	}
 
@@ -139,7 +139,7 @@ func (film *filmJson) unmarshalActor(input interface{}) (actor, error) {
 	}
 
 	if item, err := testRegistryJson.CreateItemFromMap(actMap); err != nil {
-		return nil, fmt.Errorf("unable to map to item: %w", err)
+		return nil, fmt.Errorf("creating item from map: %w", err)
 	} else if act, ok := item.(actor); !ok {
 		return nil, fmt.Errorf("item is not an actor")
 	} else {
@@ -149,9 +149,9 @@ func (film *filmJson) unmarshalActor(input interface{}) (actor, error) {
 
 func copyItemToMap(toMap map[string]interface{}, fromItem interface{}) error {
 	if bytes, err := json.Marshal(fromItem); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", fromItem, err)
+		return fmt.Errorf("marshaling from %v: %w", fromItem, err)
 	} else if err = json.Unmarshal(bytes, &toMap); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", toMap, err)
+		return fmt.Errorf("unmarshaling to %v: %w", toMap, err)
 	}
 
 	return nil
@@ -159,9 +159,9 @@ func copyItemToMap(toMap map[string]interface{}, fromItem interface{}) error {
 
 func copyMapToItem(toItem interface{}, fromMap map[string]interface{}) error {
 	if bytes, err := json.Marshal(fromMap); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", fromMap, err)
+		return fmt.Errorf("marshaling from %v: %w", fromMap, err)
 	} else if err = json.Unmarshal(bytes, toItem); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", toItem, err)
+		return fmt.Errorf("unmarshaling to %v: %w", toItem, err)
 	}
 
 	return nil

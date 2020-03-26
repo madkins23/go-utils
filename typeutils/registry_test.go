@@ -54,7 +54,7 @@ func (suite *RegistryTestSuite) TestAlias() {
 	suite.Assert().Len(suite.reg.aliases, 1)
 	err = suite.registry.Alias("x", example)
 	suite.Assert().Error(err)
-	suite.Assert().Contains(err.Error(), "unable to redefine")
+	suite.Assert().Contains(err.Error(), "can't redefine alias")
 }
 
 func (suite *RegistryTestSuite) TestRegister() {

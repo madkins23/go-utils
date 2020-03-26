@@ -81,7 +81,7 @@ type registration struct {
 // Redefining a pre-existing alias is an error.
 func (reg *registry) Alias(alias string, example interface{}) error {
 	if _, ok := reg.aliases[alias]; ok {
-		return fmt.Errorf("unable to redefine alias %s", alias)
+		return fmt.Errorf("can't redefine alias %s", alias)
 	}
 
 	exampleType := reflect.TypeOf(example)
@@ -220,7 +220,7 @@ func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{},
 
 	if mapper, ok := item.(RegistryItem); ok {
 		if err := mapper.PushToMap(result); err != nil {
-			return nil, fmt.Errorf("unable to push fields to map: %w", err)
+			return nil, fmt.Errorf("pushing item fields to map: %w", err)
 		}
 	}
 
@@ -232,21 +232,21 @@ func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{},
 func (reg *registry) CreateItemFromMap(in map[string]interface{}) (interface{}, error) {
 	typeField, found := in[TypeField]
 	if !found {
-		_ = fmt.Errorf("unable to find type for object")
+		_ = fmt.Errorf("no object type in map")
 	}
 	typeName, ok := typeField.(string)
 	if !ok {
-		_ = fmt.Errorf("unable to convert type field %v to string", typeField)
+		_ = fmt.Errorf("converting type field %v to string", typeField)
 	}
 
 	item, err := reg.Make(typeName)
 	if err != nil {
-		return nil, fmt.Errorf("unable to make item of type %s", typeField)
+		return nil, fmt.Errorf("making item of type %s: %w", typeField, err)
 	}
 
 	if mapper, ok := item.(RegistryItem); ok {
 		if err := mapper.PullFromMap(in); err != nil {
-			return nil, fmt.Errorf("unable to pull fields from map: %w", err)
+			return nil, fmt.Errorf("pulling item fields from map: %w", err)
 		}
 	}
 
