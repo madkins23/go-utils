@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// These tests demonstrates and validates use of a Registry to marshal/unmarshal JSON.
+
 type JsonTestSuite struct {
 	suite.Suite
 	film *filmJson
@@ -50,8 +52,8 @@ func TestJsonSuite(t *testing.T) {
 //////////////////////////////////////////////////////////////////////////
 
 type filmJson struct {
-	json.Marshaler   `json:",omitempty"`
-	json.Unmarshaler `json:",omitempty"`
+	json.Marshaler
+	json.Unmarshaler
 
 	Name  string
 	Lead  actor
@@ -150,8 +152,6 @@ func copyItemToMap(toMap map[string]interface{}, fromItem interface{}) error {
 		return fmt.Errorf("unable to marshal from %v: %w", fromItem, err)
 	} else if err = json.Unmarshal(bytes, &toMap); err != nil {
 		return fmt.Errorf("unable to unmarshal to %v: %w", toMap, err)
-	} else {
-		fmt.Printf("  ? %s\n", toMap)
 	}
 
 	return nil
@@ -162,8 +162,6 @@ func copyMapToItem(toItem interface{}, fromMap map[string]interface{}) error {
 		return fmt.Errorf("unable to marshal from %v: %w", fromMap, err)
 	} else if err = json.Unmarshal(bytes, toItem); err != nil {
 		return fmt.Errorf("unable to unmarshal to %v: %w", toItem, err)
-	} else {
-		fmt.Printf("  ? %s\n", toItem)
 	}
 
 	return nil
@@ -171,8 +169,8 @@ func copyMapToItem(toItem interface{}, fromMap map[string]interface{}) error {
 
 //////////////////////////////////////////////////////////////////////////
 
-// TestExample runs an example from some doc on yaml.v3 or something.
-// It's here to taunt me when I can't figure out how it all works.
+// TestExample duplicates the YAML test.
+// Not directly applicable to this test suite.
 func (suite *JsonTestSuite) TestExample() {
 	type T struct {
 		F int `json:"a,omitempty"`
@@ -186,10 +184,12 @@ func (suite *JsonTestSuite) TestExample() {
 	suite.Assert().Equal(t, x)
 }
 
-func (suite *JsonTestSuite) TestMarshal() {
+func (suite *JsonTestSuite) TestCycle() {
 	bytes, err := json.Marshal(suite.film)
 	suite.Assert().NoError(err)
-	fmt.Println(string(bytes))
+
+	//fmt.Printf(">>> marshaled:\n%s\n", string(bytes))
+
 	var film filmJson
 	suite.Assert().NoError(json.Unmarshal(bytes, &film))
 	suite.Assert().NotEqual(suite.film, &film) // fails due to unexported field 'extra'

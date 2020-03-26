@@ -26,7 +26,7 @@ type Registry interface {
 
 // RegistryItem contains methods for pushing fields to or pulling fields from a map.
 // A Registry will work with any kind of struct, but won't copy field data without this interface.
-// This is used by ConvertItemToMap and CreateItemFromMap (as )called from marshal/unmarshal code).
+// This is used by ConvertItemToMap and CreateItemFromMap (as called from marshal/unmarshal code).
 // Note that both methods must be provided for either to work.
 type RegistryItem interface {
 	PushToMap(toMap map[string]interface{}) error
@@ -36,6 +36,7 @@ type RegistryItem interface {
 // NewRegistry creates a new Registry object of the default internal type.
 // Registries created via this function are not safe for concurrent access,
 // manage this access or use NewRegistrar() to create a concurrent safe version.
+// Developers might be able to write more efficient concurrency code using Registry.
 func NewRegistry() Registry {
 	return &registry{
 		byName:  make(map[string]*registration),
@@ -76,7 +77,6 @@ type registration struct {
 //////////////////////////////////////////////////////////////////////////
 
 // Alias creates an alias to be used to shorten names.
-// Use an empty string to remove a previous alias.
 // Alias must exist prior to registering applicable types.
 // Redefining a pre-existing alias is an error.
 func (reg *registry) Alias(alias string, example interface{}) error {
@@ -142,8 +142,6 @@ func (reg *registry) Register(example interface{}) error {
 	}
 	item.allNames[0] = item.defaultName
 
-	fmt.Printf("There are %d aliases\n", len(reg.aliases))
-
 	// Look for any possible aliases for the type and add them to the list of all names.
 	for alias, prefixPath := range reg.aliases {
 		if strings.HasPrefix(item.defaultName, prefixPath) {
@@ -197,7 +195,7 @@ func (reg *registry) Make(name string) (interface{}, error) {
 	return reflect.New(item.typeObj).Interface(), nil
 }
 
-// marshalYAML converts a registry typed item into a map for further processing.
+// ConvertItemToMap converts a registry typed item into a map for further processing.
 // If the item is not of a Registry type an error is returned.
 func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{}, error) {
 	value := reflect.ValueOf(item)
@@ -221,12 +219,9 @@ func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{},
 	result[TypeField] = registration.defaultName
 
 	if mapper, ok := item.(RegistryItem); ok {
-		fmt.Printf("ConvertItemToMap(%v)\n", item)
-		fmt.Printf("  : %v\n", result)
 		if err := mapper.PushToMap(result); err != nil {
 			return nil, fmt.Errorf("unable to push fields to map: %w", err)
 		}
-		fmt.Printf("  = %v\n", result)
 	}
 
 	return result, nil
@@ -276,7 +271,6 @@ func genNameFromInterface(example interface{}) (string, error) {
 	}
 
 	last := strings.LastIndex(path, "/")
-
 	if last < 0 {
 		return "", fmt.Errorf("no slash in %s", path)
 	}

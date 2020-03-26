@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// These tests confirm the developer's understanding of how Go works.
+// More specifically how the Go reflection mechanism works.
+
 var (
 	a        = alpha{Name: "Hubert", Percent: 17.23}
 	b        = bravo{Finished: true, Iterations: 79}
@@ -31,11 +34,8 @@ func TestReflectSuite(t *testing.T) {
 //////////////////////////////////////////////////////////////////////////
 // Verify method for determining path of package via an object defined therein.
 
-// PKG_PATH should be set to the known package path for this package.
-const PKG_PATH = "github.com/madkins23/go-utils/typeutils"
-
 func (suite *ReflectTestSuite) TestPackagePath() {
-	suite.Assert().Equal(PKG_PATH, reflect.TypeOf(alpha{}).PkgPath())
+	suite.Assert().Equal(TypeUtilsPackagePath, reflect.TypeOf(alpha{}).PkgPath())
 }
 
 //////////////////////////////////////////////////////////////////////////

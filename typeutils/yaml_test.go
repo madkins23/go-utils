@@ -8,6 +8,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// These tests demonstrates and validates use of a Registry to marshal/unmarshal YAML.
+
 type YamlTestSuite struct {
 	suite.Suite
 	film *filmYaml
@@ -171,6 +173,7 @@ func copyViaYaml(dest, src interface{}) error {
 
 // TestExample runs an example from some doc on yaml.v3 or something.
 // It's here to taunt me when I can't figure out how it all works.
+// Not directly applicable to this test suite.
 func (suite *YamlTestSuite) TestExample() {
 	type T struct {
 		F int `yaml:"a,omitempty"`
@@ -187,7 +190,9 @@ func (suite *YamlTestSuite) TestExample() {
 func (suite *YamlTestSuite) TestCycle() {
 	bytes, err := yaml.Marshal(suite.film)
 	suite.Assert().NoError(err)
-	fmt.Println(string(bytes))
+
+	//fmt.Printf(">>> marshaled:\n%s\n", string(bytes))
+
 	var film filmYaml
 	suite.Assert().NoError(yaml.Unmarshal(bytes, &film))
 	suite.Assert().NotEqual(suite.film, &film) // fails due to unexported field 'extra'

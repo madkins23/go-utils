@@ -44,6 +44,7 @@ Normally Go doesn't keep type names at runtime, so it must be done by the applic
 The `Registry` object provides a way to track this and to generate objects of a "named" type.
 Created for use in Marshaling/Unmarshaling objects.
 Uses reflection. Not thread-safe.
+See test files for examples of JSON and YAML marshal/unmarshal.
 
 * `typeutils.Registrar` provides a thread-safe `Registry`.
 `Registry` methods are wrapped with a mutex object.

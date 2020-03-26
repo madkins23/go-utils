@@ -2,6 +2,11 @@ package typeutils
 
 import "fmt"
 
+// TypeUtilsPackagePath should be set to the known package path for this package.
+const TypeUtilsPackagePath = "github.com/madkins23/go-utils/typeutils"
+
+//////////////////////////////////////////////////////////////////////////
+
 type actor interface {
 	declaim() string
 }
@@ -31,6 +36,8 @@ func (b *bravo) declaim() string {
 	}
 	return fmt.Sprintf("%sfinished after %d iterations", finished, b.Iterations)
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 // YAML works with a single copyFn that will copy from map to item and vice versa.
 
