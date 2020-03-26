@@ -20,8 +20,17 @@ type Registry interface {
 	Register(example interface{}) error
 	Make(name string) (interface{}, error)
 	NameFor(item interface{}) (string, error)
-	ItemToMap(item interface{}, toMapFn ToMapFn) (map[string]interface{}, error)
-	MapToItem(in map[string]interface{}, fromMapFn FromMapFn) (interface{}, error)
+	ConvertItemToMap(item interface{}) (map[string]interface{}, error)
+	CreateItemFromMap(in map[string]interface{}) (interface{}, error)
+}
+
+// RegistryItem contains methods for pushing fields to or pulling fields from a map.
+// A Registry will work with any kind of struct, but won't copy field data without this interface.
+// This is used by ConvertItemToMap and CreateItemFromMap (as )called from marshal/unmarshal code).
+// Note that both methods must be provided for either to work.
+type RegistryItem interface {
+	PushToMap(toMap map[string]interface{}) error
+	PullFromMap(fromMap map[string]interface{}) error
 }
 
 // NewRegistry creates a new Registry object of the default internal type.
@@ -190,7 +199,7 @@ func (reg *registry) Make(name string) (interface{}, error) {
 
 // marshalYAML converts a registry typed item into a map for further processing.
 // If the item is not of a Registry type an error is returned.
-func (reg *registry) ItemToMap(item interface{}, toMapFn ToMapFn) (map[string]interface{}, error) {
+func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{}, error) {
 	value := reflect.ValueOf(item)
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
@@ -211,19 +220,21 @@ func (reg *registry) ItemToMap(item interface{}, toMapFn ToMapFn) (map[string]in
 	// This should work with both JSON and YAML.
 	result[TypeField] = registration.defaultName
 
-	if toMapFn != nil {
-		// Use function pointer to copy fields to map.
-		if err := toMapFn(item, result); err != nil {
-			return nil, fmt.Errorf("unable to copy from item to map: %w", err)
+	if mapper, ok := item.(RegistryItem); ok {
+		fmt.Printf("ConvertItemToMap(%v)\n", item)
+		fmt.Printf("  : %v\n", result)
+		if err := mapper.PushToMap(result); err != nil {
+			return nil, fmt.Errorf("unable to push fields to map: %w", err)
 		}
+		fmt.Printf("  = %v\n", result)
 	}
 
 	return result, nil
 }
 
-// MapToItem attempts to return a new item of the type specified in the map.
+// CreateItemFromMap attempts to return a new item of the type specified in the map.
 // An error is returned if this is impossible.
-func (reg *registry) MapToItem(in map[string]interface{}, fromMapFn FromMapFn) (interface{}, error) {
+func (reg *registry) CreateItemFromMap(in map[string]interface{}) (interface{}, error) {
 	typeField, found := in[TypeField]
 	if !found {
 		_ = fmt.Errorf("unable to find type for object")
@@ -238,9 +249,9 @@ func (reg *registry) MapToItem(in map[string]interface{}, fromMapFn FromMapFn) (
 		return nil, fmt.Errorf("unable to make item of type %s", typeField)
 	}
 
-	if fromMapFn != nil {
-		if err := fromMapFn(in, item); err != nil {
-			return nil, fmt.Errorf("unable to copy map to item: %w", err)
+	if mapper, ok := item.(RegistryItem); ok {
+		if err := mapper.PullFromMap(in); err != nil {
+			return nil, fmt.Errorf("unable to pull fields from map: %w", err)
 		}
 	}
 

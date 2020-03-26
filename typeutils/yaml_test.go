@@ -28,12 +28,17 @@ func init() {
 }
 
 func (suite *YamlTestSuite) SetupTest() {
+	copyFn = copyViaYaml
 	suite.film = &filmYaml{Name: "Test YAML", Index: make(map[string]actor)}
 	suite.film.Lead = &alpha{Name: "Goober", Percent: 13.23}
 	suite.film.addActor("Goober", suite.film.Lead)
 	suite.film.addActor("Snoofus", &bravo{Finished: false, Iterations: 17, extra: "stuff"})
 	suite.film.addActor("Noodle", &alpha{Name: "Noodle", Percent: 19.57, extra: "stuff"})
 	suite.film.addActor("Soup", &bravo{Finished: true, Iterations: 79})
+}
+
+func (suite *YamlTestSuite) TearDownSuite() {
+	copyFn = nil
 }
 
 func TestYamlSuite(t *testing.T) {
@@ -71,20 +76,20 @@ func (film *filmYaml) MarshalYAML() (interface{}, error) {
 		Name: film.Name,
 	}
 
-	if convert.Lead, err = testRegistryYaml.ItemToMap(film.Lead, toMapYaml); err != nil {
+	if convert.Lead, err = testRegistryYaml.ConvertItemToMap(film.Lead); err != nil {
 		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
 	}
 
 	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
-		if convert.Cast[i], err = testRegistryYaml.ItemToMap(member, toMapYaml); err != nil {
+		if convert.Cast[i], err = testRegistryYaml.ConvertItemToMap(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
 
 	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
-		if convert.Index[key], err = testRegistryYaml.ItemToMap(member, toMapYaml); err != nil {
+		if convert.Index[key], err = testRegistryYaml.ConvertItemToMap(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
@@ -143,7 +148,7 @@ func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 		return nil, fmt.Errorf("unable to decode to map: %w", err)
 	}
 
-	if item, err := testRegistryYaml.MapToItem(mapped, fromMapYaml); err != nil {
+	if item, err := testRegistryYaml.CreateItemFromMap(mapped); err != nil {
 		return nil, fmt.Errorf("unable to map %v to item: %w", mapped, err)
 	} else if act, ok := item.(actor); !ok {
 		return nil, fmt.Errorf("item %v is not an actor", item)
@@ -152,21 +157,11 @@ func (film *filmYaml) unmarshalActor(value *yaml.Node) (actor, error) {
 	}
 }
 
-func fromMapYaml(from map[string]interface{}, to interface{}) error {
-	if bytes, err := yaml.Marshal(from); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", from, err)
-	} else if err = yaml.Unmarshal(bytes, to); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
-	}
-
-	return nil
-}
-
-func toMapYaml(from interface{}, to map[string]interface{}) error {
-	if bytes, err := yaml.Marshal(from); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", from, err)
-	} else if err = yaml.Unmarshal(bytes, to); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
+func copyViaYaml(dest, src interface{}) error {
+	if bytes, err := yaml.Marshal(src); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", src, err)
+	} else if err = yaml.Unmarshal(bytes, dest); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", dest, err)
 	}
 
 	return nil

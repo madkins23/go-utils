@@ -28,12 +28,19 @@ func init() {
 }
 
 func (suite *JsonTestSuite) SetupTest() {
+	copyMapFromItemFn = copyItemToMap
+	copyItemFromMapFn = copyMapToItem
 	suite.film = &filmJson{Name: "Test JSON", Index: make(map[string]actor)}
 	suite.film.Lead = &alpha{Name: "Goober", Percent: 13.23}
 	suite.film.addActor("Goober", suite.film.Lead)
 	suite.film.addActor("Snoofus", &bravo{Finished: false, Iterations: 17, extra: "stuff"})
 	suite.film.addActor("Noodle", &alpha{Name: "Noodle", Percent: 19.57, extra: "stuff"})
 	suite.film.addActor("Soup", &bravo{Finished: true, Iterations: 79})
+}
+
+func (suite *JsonTestSuite) TearDownSuite() {
+	copyMapFromItemFn = nil
+	copyItemFromMapFn = nil
 }
 
 func TestJsonSuite(t *testing.T) {
@@ -71,20 +78,20 @@ func (film *filmJson) MarshalJSON() ([]byte, error) {
 		Name: film.Name,
 	}
 
-	if convert.Lead, err = testRegistryJson.ItemToMap(film.Lead, toMapJson); err != nil {
+	if convert.Lead, err = testRegistryJson.ConvertItemToMap(film.Lead); err != nil {
 		return nil, fmt.Errorf("unable to convert lead to map: %w", err)
 	}
 
 	convert.Cast = make([]interface{}, len(film.Cast))
 	for i, member := range film.Cast {
-		if convert.Cast[i], err = testRegistryJson.ItemToMap(member, toMapJson); err != nil {
+		if convert.Cast[i], err = testRegistryJson.ConvertItemToMap(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
 
 	convert.Index = make(map[string]interface{}, len(film.Index))
 	for key, member := range film.Index {
-		if convert.Index[key], err = testRegistryJson.ItemToMap(member, toMapJson); err != nil {
+		if convert.Index[key], err = testRegistryJson.ConvertItemToMap(member); err != nil {
 			return nil, fmt.Errorf("unable to convert cast member to map: %w", err)
 		}
 	}
@@ -129,7 +136,7 @@ func (film *filmJson) unmarshalActor(input interface{}) (actor, error) {
 		return nil, fmt.Errorf("actor input should be map")
 	}
 
-	if item, err := testRegistryJson.MapToItem(actMap, fromMapJson); err != nil {
+	if item, err := testRegistryJson.CreateItemFromMap(actMap); err != nil {
 		return nil, fmt.Errorf("unable to map to item: %w", err)
 	} else if act, ok := item.(actor); !ok {
 		return nil, fmt.Errorf("item is not an actor")
@@ -138,21 +145,25 @@ func (film *filmJson) unmarshalActor(input interface{}) (actor, error) {
 	}
 }
 
-func fromMapJson(from map[string]interface{}, to interface{}) error {
-	if bytes, err := json.Marshal(from); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", from, err)
-	} else if err = json.Unmarshal(bytes, &to); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
+func copyItemToMap(toMap map[string]interface{}, fromItem interface{}) error {
+	if bytes, err := json.Marshal(fromItem); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", fromItem, err)
+	} else if err = json.Unmarshal(bytes, &toMap); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", toMap, err)
+	} else {
+		fmt.Printf("  ? %s\n", toMap)
 	}
 
 	return nil
 }
 
-func toMapJson(from interface{}, to map[string]interface{}) error {
-	if bytes, err := json.Marshal(from); err != nil {
-		return fmt.Errorf("unable to marshal from %v: %w", from, err)
-	} else if err = json.Unmarshal(bytes, &to); err != nil {
-		return fmt.Errorf("unable to unmarshal to %v: %w", to, err)
+func copyMapToItem(toItem interface{}, fromMap map[string]interface{}) error {
+	if bytes, err := json.Marshal(fromMap); err != nil {
+		return fmt.Errorf("unable to marshal from %v: %w", fromMap, err)
+	} else if err = json.Unmarshal(bytes, toItem); err != nil {
+		return fmt.Errorf("unable to unmarshal to %v: %w", toItem, err)
+	} else {
+		fmt.Printf("  ? %s\n", toItem)
 	}
 
 	return nil
