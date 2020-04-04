@@ -159,11 +159,43 @@ func (suite *RegistryTestSuite) TestCycleAlias() {
 	suite.Assert().Equal(reflect.TypeOf(example), reflect.TypeOf(object))
 }
 
+func (suite *RegistryTestSuite) TestGenNames() {
+	example := &alpha{}
+	name, aliases, err := suite.reg.GenNames(example, false)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(TypeUtilsPackagePath+"/alpha", name)
+	suite.Assert().Nil(aliases)
+	name, aliases, err = suite.reg.GenNames(example, true)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(TypeUtilsPackagePath+"/alpha", name)
+	suite.Assert().NotNil(aliases)
+	suite.Assert().Empty(aliases)
+
+	suite.Assert().NoError(suite.registry.Alias("typeUtils", example))
+	name, aliases, err = suite.reg.GenNames(example, false)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(TypeUtilsPackagePath+"/alpha", name)
+	suite.Assert().Nil(aliases)
+	name, aliases, err = suite.reg.GenNames(example, true)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal("[typeUtils]alpha", name)
+	suite.Assert().NotNil(aliases)
+	suite.Assert().Len(aliases, 1)
+
+	name, aliases, err = suite.reg.GenNames(&example, true)
+	suite.Assert().Error(err)
+	suite.Assert().Contains(err.Error(), "no path for type")
+	name, aliases, err = suite.reg.GenNames(1, true)
+	suite.Assert().Error(err)
+	suite.Assert().Contains(err.Error(), "no path for type")
+}
+
 func (suite *RegistryTestSuite) TestGenTypeName() {
 	example := &alpha{}
 	name, err := genNameFromInterface(example)
 	suite.Assert().NoError(err)
 	suite.Assert().Equal(TypeUtilsPackagePath+"/alpha", name)
+
 	_, err = genNameFromInterface(&example)
 	suite.Assert().Error(err)
 	suite.Assert().Contains(err.Error(), "no path for type")

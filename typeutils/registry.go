@@ -20,6 +20,7 @@ type Registry interface {
 	Register(example interface{}) error
 	Make(name string) (interface{}, error)
 	NameFor(item interface{}) (string, error)
+	GenNames(item interface{}, aliased bool) (string, []string, error)
 	ConvertItemToMap(item interface{}) (map[string]interface{}, error)
 	CreateItemFromMap(in map[string]interface{}) (interface{}, error)
 }
@@ -135,30 +136,19 @@ func (reg *registry) Register(example interface{}) error {
 	}
 
 	// Initialize default name to full name with package and type.
-	var err error
-	item.defaultName, err = genNameFromInterface(example)
+	name, aliases, err := reg.GenNames(example, true)
 	if err != nil {
-		return err
-	}
-	item.allNames[0] = item.defaultName
-
-	// Look for any possible aliases for the type and add them to the list of all names.
-	for alias, prefixPath := range reg.aliases {
-		if strings.HasPrefix(item.defaultName, prefixPath) {
-			aliasedName := "[" + alias + "]" + item.defaultName[len(prefixPath)+1:]
-			item.allNames = append(item.allNames, aliasedName)
-		}
+		return fmt.Errorf("getting type name of example: %w", err)
 	}
 
-	// Choose default name again from shortest, therefore most likely an aliased name if there are any.
-	for _, name := range item.allNames[1:] {
-		// Using >= favors later aliases of same size.
-		if len(name) <= len(item.defaultName) {
-			item.defaultName = name
-		}
+	item.defaultName = name
+	item.allNames[0] = name
+	for _, alias := range aliases {
+		item.allNames = append(item.allNames, alias)
 	}
 
 	// Add name lookups for all default and aliased names.
+	reg.byName[name] = item
 	for _, name := range item.allNames {
 		reg.byName[name] = item
 	}
@@ -167,6 +157,40 @@ func (reg *registry) Register(example interface{}) error {
 	reg.byType[exType] = item
 
 	return nil
+}
+
+// GenNames creates the possible names for the type represented by the example object.
+// Returns the 'canonical' name, an optional array of aliased names per current aliases, and any error.
+// If the aliased argument is true a possibly empty array will be returned for the second argument otherwise nil.
+func (reg *registry) GenNames(example interface{}, aliased bool) (string, []string, error) {
+	// Initialize default name to full name with package and type.
+	name, err := genNameFromInterface(example)
+	if err != nil {
+		return "", nil, fmt.Errorf("generating basic name: %w", err)
+	}
+
+	var aliases []string
+	if aliased {
+		aliases = make([]string, 0, len(reg.aliases))
+
+		// Look for any possible aliases for the type and add them to the list of all names.
+		for alias, prefixPath := range reg.aliases {
+			if strings.HasPrefix(name, prefixPath) {
+				aliases = append(aliases, "["+alias+"]"+name[len(prefixPath)+1:])
+			}
+		}
+
+		// Choose default name again from shortest, therefore most likely an aliased name if there are any.
+		nameLen := len(name)
+		for _, alias := range aliases {
+			// Using <= favors later aliases of same size.
+			if len(alias) <= nameLen {
+				name = alias
+			}
+		}
+	}
+
+	return name, aliases, nil
 }
 
 // NameFor returns a name for the specified object.
