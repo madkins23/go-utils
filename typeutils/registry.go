@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-const TypeField = "$type$"
+const (
+	TypeField        = "$type$"
+	TypeFieldEscaped = "\\$type\\$"
+)
 
 type FromMapFn func(from map[string]interface{}, to interface{}) error
 type ToMapFn func(from interface{}, to map[string]interface{}) error

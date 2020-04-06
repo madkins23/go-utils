@@ -2,6 +2,8 @@ package typeutils
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -187,6 +189,21 @@ func (suite *YamlTestSuite) TestExample() {
 	suite.Assert().Equal(t, x)
 }
 
+func (suite *YamlTestSuite) TestGetTypeNameAndReset() {
+	reader := strings.NewReader(simpleYAML)
+	suite.Assert().NotNil(reader)
+
+	// Get type name.
+	name, err := GetYamlTypeNameAndReset(reader)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal("[nexus]basic", name)
+
+	// Check for reset.
+	bytes, err := ioutil.ReadAll(reader)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(simpleYAML, string(bytes))
+}
+
 func (suite *YamlTestSuite) TestCycle() {
 	bytes, err := yaml.Marshal(suite.film)
 	suite.Assert().NoError(err)
@@ -206,3 +223,13 @@ func (suite *YamlTestSuite) TestCycle() {
 	}
 	suite.Assert().Equal(suite.film, &film) // succeeds now that unexported fields are gone.
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+const simpleYAML = `
+$type$: '[nexus]basic'
+directory:
+  alpha: 780ea966-751e-4ad0-bce6-2def66b557e8
+  bravo: 3c6931be-42b8-45b7-b026-f45a2307fda0
+engine: nexus
+`
