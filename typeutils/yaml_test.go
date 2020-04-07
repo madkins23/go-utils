@@ -54,6 +54,29 @@ func TestYamlSuite(t *testing.T) {
 
 //////////////////////////////////////////////////////////////////////////
 
+func (suite *YamlTestSuite) TestYamlBaseIsRegistry() {
+	var reg Registry = &YamlBase{}
+	_, ok := reg.(Registry)
+	suite.Assert().True(ok)
+}
+
+func (suite *YamlTestSuite) TestGetTypeNameAndReset() {
+	reader := strings.NewReader(simpleYaml)
+	suite.Assert().NotNil(reader)
+
+	// Get type name.
+	name, err := getYamlTypeNameAndReset(reader)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal("[test]filmYaml", name)
+
+	// Check for reset.
+	bytes, err := ioutil.ReadAll(reader)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(simpleYaml, string(bytes))
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 type filmYaml struct {
 	yaml.Marshaler
 	yaml.Unmarshaler
@@ -199,37 +222,6 @@ func copyViaYaml(dest, src interface{}) error {
 }
 
 //////////////////////////////////////////////////////////////////////////
-
-// TestExample runs an example from some doc on yaml.v3 or something.
-// It's here to taunt me when I can't figure out how it all works.
-// Not directly applicable to this test suite.
-func (suite *YamlTestSuite) TestExample() {
-	type T struct {
-		F int `yaml:"a,omitempty"`
-		B int
-	}
-	t := T{F: 1, B: 2}
-	bytes, err := yaml.Marshal(t)
-	suite.Assert().NoError(err)
-	var x T
-	suite.Assert().NoError(yaml.Unmarshal(bytes, &x))
-	suite.Assert().Equal(t, x)
-}
-
-func (suite *YamlTestSuite) TestGetTypeNameAndReset() {
-	reader := strings.NewReader(simpleYaml)
-	suite.Assert().NotNil(reader)
-
-	// Get type name.
-	name, err := getYamlTypeNameAndReset(reader)
-	suite.Assert().NoError(err)
-	suite.Assert().Equal("[test]filmYaml", name)
-
-	// Check for reset.
-	bytes, err := ioutil.ReadAll(reader)
-	suite.Assert().NoError(err)
-	suite.Assert().Equal(simpleYaml, string(bytes))
-}
 
 func (suite *YamlTestSuite) TestMarshalCycle() {
 	bytes, err := yaml.Marshal(suite.film)

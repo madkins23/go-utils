@@ -12,6 +12,7 @@ import (
 )
 
 type YamlBase struct {
+	Registry
 	reg Registry
 }
 
