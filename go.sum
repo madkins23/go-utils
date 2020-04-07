@@ -7,6 +7,8 @@ github.com/gertd/go-pluralize v0.1.0 h1:swX8J77I2guxzr0Cl7Ne5ztWop8An2oNPEUl3Q0l
 github.com/gertd/go-pluralize v0.1.0/go.mod h1:t5DfHcumb6m0RqyVJDrDLEzL2AGeaiqUXIcDNwLaeAs=
 github.com/gertd/go-pluralize v0.1.1 h1:fQhql/WRRwr4TVp+TCw12s2esCacvEVBdkTUUwNqF/Q=
 github.com/gertd/go-pluralize v0.1.1/go.mod h1:t5DfHcumb6m0RqyVJDrDLEzL2AGeaiqUXIcDNwLaeAs=
+github.com/gertd/go-pluralize v0.1.4 h1:whO9tabQ5OSpTFr8oZRrlM3owcuyc6NFJho54kBCQUE=
+github.com/gertd/go-pluralize v0.1.4/go.mod h1:3DkM/CcGP3dn/Gt02QBhRit6Jh9Pt9nSV8HHSu88NuE=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
