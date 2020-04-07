@@ -13,11 +13,10 @@ import (
 
 type YamlBase struct {
 	Registry
-	reg Registry
 }
 
 func NewYamlBase(reg Registry) *YamlBase {
-	return &YamlBase{reg: reg}
+	return &YamlBase{Registry: reg}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,7 +56,7 @@ func (yb *YamlBase) LoadFromString(source string) (interface{}, error) {
 func (yb *YamlBase) loadFromReadSeeker(reader io.ReadSeeker) (interface{}, error) {
 	if typeName, err := getYamlTypeNameAndReset(reader); err != nil {
 		return nil, fmt.Errorf("get YAML type name: %w", err)
-	} else if item, err := yb.reg.Make(typeName); err != nil {
+	} else if item, err := yb.Registry.Make(typeName); err != nil {
 		return nil, fmt.Errorf("make item of type %s: %w", typeName, err)
 	} else if err := yaml.NewDecoder(reader).Decode(item); err != nil {
 		return nil, fmt.Errorf("unmarshal %s: %w", typeName, err)
