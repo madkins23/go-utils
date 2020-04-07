@@ -1,7 +1,11 @@
 package typeutils
 
 import (
+	"io"
+	"io/ioutil"
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -9,13 +13,13 @@ import (
 
 //////////////////////////////////////////////////////////////////////////
 
-type RegistryTestSuite struct {
+type registryTestSuite struct {
 	suite.Suite
 	registry Registry
 	reg      *registry
 }
 
-func (suite *RegistryTestSuite) SetupTest() {
+func (suite *registryTestSuite) SetupTest() {
 	// See json_test.go for these definitions.
 	copyMapFromItemFn = copyItemToMap
 	copyItemFromMapFn = copyMapToItem
@@ -26,24 +30,24 @@ func (suite *RegistryTestSuite) SetupTest() {
 	suite.Assert().True(ok)
 }
 
-func (suite *RegistryTestSuite) TearDownSuite() {
+func (suite *registryTestSuite) TearDownSuite() {
 	copyMapFromItemFn = nil
 	copyItemFromMapFn = nil
 }
 
 func TestRegistrySuite(t *testing.T) {
-	suite.Run(t, new(RegistryTestSuite))
+	suite.Run(t, new(registryTestSuite))
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-func (suite *RegistryTestSuite) TestNewRegistry() {
+func (suite *registryTestSuite) TestNewRegistry() {
 	suite.Assert().NotNil(suite.registry)
 	suite.Assert().NotNil(suite.reg.byName)
 	suite.Assert().NotNil(suite.reg.byType)
 }
 
-func (suite *RegistryTestSuite) TestAlias() {
+func (suite *registryTestSuite) TestAlias() {
 	example := &alpha{}
 	err := suite.registry.Alias("badPackage", &example)
 	suite.Assert().Error(err)
@@ -57,7 +61,7 @@ func (suite *RegistryTestSuite) TestAlias() {
 	suite.Assert().Contains(err.Error(), "can't redefine alias")
 }
 
-func (suite *RegistryTestSuite) TestRegister() {
+func (suite *registryTestSuite) TestRegister() {
 	example := &alpha{}
 	err := suite.registry.Register(&example)
 	suite.Assert().Error(err)
@@ -73,7 +77,7 @@ func (suite *RegistryTestSuite) TestRegister() {
 	suite.Assert().Contains(err.Error(), "previous registration")
 }
 
-func (suite *RegistryTestSuite) TestNameFor() {
+func (suite *registryTestSuite) TestNameFor() {
 	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Register(example))
 	exType, err := suite.registry.NameFor(example)
@@ -81,7 +85,7 @@ func (suite *RegistryTestSuite) TestNameFor() {
 	suite.Assert().Equal(TypeUtilsPackagePath+"/alpha", exType)
 }
 
-func (suite *RegistryTestSuite) TestMake() {
+func (suite *registryTestSuite) TestMake() {
 	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Register(example))
 	item, err := suite.registry.Make(TypeUtilsPackagePath + "/alpha")
@@ -90,7 +94,7 @@ func (suite *RegistryTestSuite) TestMake() {
 	suite.Assert().IsType(example, item)
 }
 
-func (suite *RegistryTestSuite) TestConverItemToMap() {
+func (suite *registryTestSuite) TestConverItemToMap() {
 	suite.Assert().NoError(suite.registry.Register(&alpha{}))
 	m, err := suite.registry.ConvertItemToMap(&alpha{
 		Name:    "Goober Snoofus",
@@ -105,7 +109,7 @@ func (suite *RegistryTestSuite) TestConverItemToMap() {
 	suite.Assert().Equal(17.23, m["Percent"])
 }
 
-func (suite *RegistryTestSuite) TestCreateItemFromMap() {
+func (suite *registryTestSuite) TestCreateItemFromMap() {
 	suite.Assert().NoError(suite.registry.Register(&alpha{}))
 	example, err := suite.registry.CreateItemFromMap(map[string]interface{}{
 		TypeField: TypeUtilsPackagePath + "/alpha",
@@ -122,7 +126,7 @@ func (suite *RegistryTestSuite) TestCreateItemFromMap() {
 	}, example)
 }
 
-func (suite *RegistryTestSuite) TestCycleSimple() {
+func (suite *registryTestSuite) TestCycleSimple() {
 	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Register(example))
 	registration := suite.reg.byType[reflect.TypeOf(example).Elem()]
@@ -137,7 +141,7 @@ func (suite *RegistryTestSuite) TestCycleSimple() {
 	suite.Assert().Equal(reflect.TypeOf(example), reflect.TypeOf(object))
 }
 
-func (suite *RegistryTestSuite) TestCycleAlias() {
+func (suite *registryTestSuite) TestCycleAlias() {
 	example := &alpha{}
 	suite.Assert().NoError(suite.registry.Alias("typeUtils", example))
 	suite.Assert().NoError(suite.registry.Register(example))
@@ -159,7 +163,7 @@ func (suite *RegistryTestSuite) TestCycleAlias() {
 	suite.Assert().Equal(reflect.TypeOf(example), reflect.TypeOf(object))
 }
 
-func (suite *RegistryTestSuite) TestGenNames() {
+func (suite *registryTestSuite) TestGenNames() {
 	example := &alpha{}
 	name, aliases, err := suite.reg.GenNames(example, false)
 	suite.Assert().NoError(err)
@@ -190,7 +194,7 @@ func (suite *RegistryTestSuite) TestGenNames() {
 	suite.Assert().Contains(err.Error(), "no path for type")
 }
 
-func (suite *RegistryTestSuite) TestGenTypeName() {
+func (suite *registryTestSuite) TestGenTypeName() {
 	example := &alpha{}
 	name, err := genNameFromInterface(example)
 	suite.Assert().NoError(err)
@@ -203,3 +207,44 @@ func (suite *RegistryTestSuite) TestGenTypeName() {
 	suite.Assert().Error(err)
 	suite.Assert().Contains(err.Error(), "no path for type")
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+// Make sure io.ReadSeeker works the way we think.
+func (suite *registryTestSuite) TestReadSeeker() {
+	var err error
+	var readSeek io.ReadSeeker
+
+	stringReader := strings.NewReader(jabberwocky)
+	suite.Assert().NotNil(stringReader)
+	readSeek = stringReader
+	suite.Assert().NotNil(readSeek)
+
+	file, err := ioutil.TempFile("", "*.test")
+	defer func() {
+		suite.Assert().NoError(file.Close())
+		suite.Assert().NoError(os.Remove(file.Name()))
+	}()
+	suite.Assert().NoError(err)
+	suite.Assert().NotNil(file)
+	readSeek = file
+	suite.Assert().NotNil(readSeek)
+
+	_, err = file.Write([]byte(jabberwocky))
+	suite.Assert().NoError(err)
+	where, err := file.Seek(0, io.SeekStart)
+	suite.Assert().NoError(err)
+	suite.Assert().Zero(where)
+	bytes, err := ioutil.ReadAll(file)
+	suite.Assert().NoError(err)
+	suite.Assert().Equal(jabberwocky, string(bytes))
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+const jabberwocky = `
+'Twas brillig, and the slithy toves.
+Did gyre and gimble in the wabe:
+All mimsy were the borogoves,
+And the mome raths outgrabe.
+`
