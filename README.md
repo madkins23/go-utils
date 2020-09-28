@@ -10,6 +10,12 @@ in code that the author has been writing for his own use.
 
 See the source for documentation.
 
+## `array`
+
+Array utilities.
+
+* `array.StringElementsMatch()` compares two arrays to see if they match irrespective of order.
+
 ## `path`
 
 Path utilities.
