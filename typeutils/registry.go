@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	TypeField        = "$type$"
-	TypeFieldEscaped = "\\$type\\$"
+	TypeField        = "<type>"
+	TypeFieldEscaped = "<type>"
 )
 
 type FromMapFn func(from map[string]interface{}, to interface{}) error

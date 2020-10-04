@@ -298,36 +298,36 @@ func (suite *YamlTestSuite) TestMarshalStringCycle() {
 //////////////////////////////////////////////////////////////////////////
 
 const simpleYaml = `
-$type$: '[test]filmYaml'
+<type>: '[test]filmYaml'
 name:   'Blockbuster Movie'
 lead: {
-  $type$: '[test]alpha',
+  <type>: '[test]alpha',
   name: 'Lance Lucky',
   percentDone: 23.79,
   extra: 'Yaaaa!'
 }
 cast:
 - {
-    $type$: '[test]alpha',
+    <type>: '[test]alpha',
     name: 'Lance Lucky',
     percentDone: 23.79,
     extra: false
   }
 - {
-    $type$: '[test]bravo',
+    <type>: '[test]bravo',
     finished: true,
     iterations: 13,
     extra: 'gibbering ghostwhistle'
   }
 index: {
   'Lucky, Lance': {
-    $type$: '[test]alpha',
+    <type>: '[test]alpha',
     name: 'Lance Lucky',
     percentDone: 23.79,
     extra: 'marshmallow stars'
   },
   'Queue, Susie': {
-    $type$: '[test]bravo',
+    <type>: '[test]bravo',
     finished: true,
     iterations: 13,
     extra: 19.57
