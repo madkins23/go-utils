@@ -60,10 +60,15 @@ func (p *Periodic) Ticker(interval time.Duration) {
 		defer p.finalFn()
 	}
 
+	cycles := uint(0)
+	if p.endErr = p.cycleFn(cycles); p.endErr != nil {
+		p.done <- true
+		return
+	}
+
 	signal.Notify(p.signals, syscall.SIGINT, syscall.SIGTERM)
 	go p.handleSignals()
 
-	cycles := uint(0)
 	ticker := time.NewTicker(interval)
 	for {
 		// Use two select statements to prioritize stop channel over ticker.

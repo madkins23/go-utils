@@ -23,11 +23,11 @@ func TestTickerSimple(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, p)
-	go p.Ticker(10 * time.Millisecond)
-	time.Sleep(105 * time.Millisecond)
+	go p.Ticker(11 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	p.Stop()
 	assert.NoError(t, p.Finished())
-	assert.Equal(t, 10, count)
+	assert.Contains(t, []int{10, 11}, count)
 	assert.True(t, stopped)
 }
 
@@ -37,12 +37,33 @@ func TestTickerNoCycleFn(t *testing.T) {
 	require.Nil(t, p)
 }
 
-func TestTickerErrorInCycle(t *testing.T) {
+func TestTickerErrorInCycle0(t *testing.T) {
 	started := false
 	stopped := false
 	p, err := NewPeriodic(log.Logger(), func(cycles uint) error {
 		started = true
 		return errors.New("some sort of error")
+	}, func() {
+		stopped = true
+	})
+	require.NoError(t, err)
+	require.NotNil(t, p)
+	go p.Ticker(5 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
+	assert.Error(t, p.Finished())
+	assert.True(t, started)
+	assert.True(t, stopped)
+}
+
+func TestTickerErrorInCycle3(t *testing.T) {
+	started := false
+	stopped := false
+	p, err := NewPeriodic(log.Logger(), func(cycles uint) error {
+		started = true
+		if cycles == 3 {
+			return errors.New("some sort of error")
+		}
+		return nil
 	}, func() {
 		stopped = true
 	})
