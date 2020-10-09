@@ -4,7 +4,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// LocalLogger provides an object-specific logger and associated functionality.
+// LocalLogger provides a logger mixin and associated functionality.
+// Embed this object within another object to provide an object-specific Logger.
 type LocalLogger struct {
 	logger *zerolog.Logger
 }
@@ -16,9 +17,10 @@ func (ll *LocalLogger) Logger() *zerolog.Logger {
 	return ll.LoggerWithFn(Logger)
 }
 
-// LocalLogger returns the local logger.
+// LoggerWithFn returns the local logger.
 // If the local logger is not yet set it will be configured to the logger returned
 // by the specified default function.
+// Override LocalLogger.Logger() and call this with an appropriate function.
 func (ll *LocalLogger) LoggerWithFn(defaultFn func() *zerolog.Logger) *zerolog.Logger {
 	if ll.logger == nil {
 		ll.logger = defaultFn()

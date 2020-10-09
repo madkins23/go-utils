@@ -18,12 +18,28 @@ Array utilities.
 
 * `array.StringElementsMatch()` compares two arrays to see if they match irrespective of order.
 
+## `cycle`
+
+Periodic code execution.
+
+* `cycle.Periodic` type provides a mechanism for cyclically executing code.
+* `Periodic.Ticker` executes code at specified intervals.
+
+## `log`
+
+Logging utilities using [zerolog](https://github.com/rs/zerolog).
+
+* `log.Logger()` returns the default zerolog logger.
+* `log.LocalLogger` is a logging mixin for embedding in other structs.
+* `log.Console` configures the default zerolog logger for readable format
+  instead of the default JSON record output.
+
 ## `path`
 
 Path utilities.
 
 * `path.HomePath()` prepends a relative file path with the user's home directory.
-Works on linux and should work on Mac and Windows but untested by author.
+  Works on linux and should work on Mac and Windows but untested by author.
 
 ## `test`
 

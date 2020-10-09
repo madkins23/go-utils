@@ -8,6 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func ExampleLogger() {
+	Logger().Info().Msg("Message")
+	// Output:
+}
+
 func TestLogger(t *testing.T) {
 	logger := Logger()
 	require.NotNil(t, logger)

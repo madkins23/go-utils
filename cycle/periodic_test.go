@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func ExampleTicker() {
+func ExamplePeriodic() {
 	p, err := NewPeriodic(func(cycles uint) error {
 		fmt.Println("Cycle Function")
 		return nil
@@ -30,6 +30,12 @@ func ExampleTicker() {
 	if err = p.Finished(); err != nil {
 		panic(err)
 	}
+	// Output: Cycle Function
+	// Cycle Function
+	// Cycle Function
+	// Cycle Function
+	// Cycle Function
+	// Final Function
 }
 
 func TestTickerSimple(t *testing.T) {

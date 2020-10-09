@@ -12,6 +12,41 @@ type withLocalLogger struct {
 	LocalLogger
 }
 
+func ExampleLocalLogger_Logger() {
+	type useDefaultLogger struct {
+		LocalLogger
+	}
+	var object useDefaultLogger
+	object.Logger().Info().Msg("Use default logger")
+	// Output:
+}
+
+func ExampleLocalLogger_LoggerWithFn() {
+	type useSpecialLogger struct {
+		LocalLogger
+	}
+	var object useSpecialLogger
+	// Override LocalLogger.Logger() by defining userSpecialLogger.Logger()
+	// and have it call LocalLogger.LoggerWithFn() sort of as shown below
+	// (can't define methods within example function):
+	object.LoggerWithFn(func() *zerolog.Logger {
+		defaultLogger := Logger().With().Str("fn", "special").Logger()
+		return &defaultLogger
+	}).Info().Msg("Use special logger")
+	// Output:
+}
+
+func ExampleLocalLogger_SetLogger() {
+	type useSetLogger struct {
+		LocalLogger
+	}
+	var object useSetLogger
+	setLogger := Logger().With().Str("set", "logger").Logger()
+	object.SetLogger(&setLogger)
+	object.Logger().Info().Msg("Use set logger")
+	// Output:
+}
+
 func TestLocalLogger(t *testing.T) {
 	w := &withLocalLogger{}
 	require.NotNil(t, w)
