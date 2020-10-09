@@ -2,13 +2,15 @@
 
 Common Go packages shared by other Go projects.
 
-These are not really production quality packages, nor are they maintained or supported.
-They're simplistic mechanisms implemented to solve specific problems
-in code that the author has been writing for his own use.
+You are more than welcome to use this package as is but these are
+utility packages constructed by the author for use in personal projects.
+The author makes occasional changes and attempts to follow proper versioning and release protocols,
+however this code should not be considered production quality or maintained.
 
-*If you need this functionality consider copying the code into your own project and modifying to fit your need.*
+*Consider copying the code into your own project and modifying to fit your need.*
 
-See the source for documentation.
+See the [source](https://github.com/madkins23/go-utils)
+or [godoc](https://godoc.org/github.com/madkins23/go-utils) for documentation.
 
 ## `array`
 
