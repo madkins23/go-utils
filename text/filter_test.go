@@ -1,6 +1,7 @@
 package text
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,6 +10,12 @@ import (
 const (
 	okChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
+
+func ExampleJustAlphaNumeric() {
+	mixed := "alpha+Numeric123(*#&$!OK"
+	fmt.Println(JustAlphaNumeric(mixed))
+	// Output: alphaNumeric123OK
+}
 
 func TestJustAlphaNumeric(t *testing.T) {
 	assert.Equal(t, okChars, okChars)

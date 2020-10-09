@@ -23,7 +23,7 @@ func init() {
 	}
 }
 
-// justAlphaNumeric removes all non-alphanumeric characters from a string.
+// JustAlphaNumeric removes all non-alphanumeric characters from a string.
 func JustAlphaNumeric(text string) string {
 	return regexAphaNumeric.ReplaceAllString(text, "")
 }

@@ -13,6 +13,22 @@ const (
 	testOutString = "Standard Output"
 )
 
+func ExampleCaptureStderr() {
+	text, err := CaptureStderr(func() {
+		_, _ = fmt.Fprint(os.Stderr, "standard error")
+	})
+	fmt.Println(text, err)
+	// Output: standard error <nil>
+}
+
+func ExampleCaptureStdout() {
+	text, err := CaptureStdout(func() {
+		_, _ = fmt.Fprint(os.Stdout, "standard output")
+	})
+	fmt.Println(text, err)
+	// Output: standard output <nil>
+}
+
 func TestCaptureStderr(t *testing.T) {
 	text, err := CaptureStderr(func() {
 		_, _ = fmt.Fprint(os.Stderr, testErrString)

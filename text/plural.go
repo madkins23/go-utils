@@ -9,7 +9,7 @@ var (
 
 // Pluralize returns singular or plural form of the specified word based on the count.
 // Count of 1 is singular, otherwise the plural form is returned.
-// Based on the go-pluralize/Pluralize() algorithm.
+// Uses the gertd/go-pluralize/Pluralize() function, just simplifies usage a tad.
 // May only work if the word is singular.
 func Pluralize(word string, count int) string {
 	return plural.Pluralize(word, count, false)

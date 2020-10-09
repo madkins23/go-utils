@@ -6,10 +6,14 @@ import (
 	"os"
 )
 
+// CaptureStderr executes the specified function,
+// capturing all stderr output and returning it along with any error result.
 func CaptureStderr(test func()) (string, error) {
 	return capture(&os.Stderr, test)
 }
 
+// CaptureStdout executes the specified function,
+// capturing all stdout output and returning it along with any error result.
 func CaptureStdout(test func()) (string, error) {
 	return capture(&os.Stdout, test)
 }

@@ -1,6 +1,7 @@
 package path
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -15,6 +16,10 @@ const (
 
 // HomePath tests.
 // NOTE: Error conditions not testable since os/user isn't an interface.
+
+func ExampleHomePath() {
+	fmt.Println(HomePath("big/bopper"))
+}
 
 func TestHomePath_justHome(t *testing.T) {
 	absPath, err := HomePath()
