@@ -41,23 +41,6 @@ Path utilities.
 * `path.HomePath()` prepends a relative file path with the user's home directory.
   Works on linux and should work on Mac and Windows but untested by author.
 
-## `reg`
-
-Type registration mechanism built with minimal use of reflection.
-
-* `reg.Alias` creates an aliased Registry object for package-specific registration.
-  First registration via this object does the alias registration automatically.
-
-* `reg.Registry` provides a way to register types by name.
-  Normally Go doesn't keep type names at runtime, so it must be done by the application.
-  The `Registry` object provides a way to track this and to generate objects of a "named" type.
-  Created for use in Marshaling/Unmarshaling objects. Uses reflection.
-  Not thread-safe but in normal usage pattern may not matter.
-  See test files for examples of JSON and YAML marshal/unmarshal.
-
-* `reg.Registrar` provides a thread-safe `Registry`.
-  `Registry` methods are wrapped with a mutex object.
-
 ## `test`
 
 Test utilities.
@@ -78,4 +61,7 @@ Text utilities.
 
 ## `typeutils`
 
-Type utilities.
+Original location of type registration mechanism.
+This code has since been removed to the `reg` package in the
+[`go-type`](https://github.com/madkins23/go-type) project.
+The `typeutils` package will be removed entirely in any future `V2` version.

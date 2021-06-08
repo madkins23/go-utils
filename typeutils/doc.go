@@ -4,13 +4,10 @@
 // which has been copied to the reg package.
 // The version here is the original.
 //
-// Changes in design and functionality will made to the reg package in the future.
-// Applicable bugs found in reg may be fixed here as well.
-// The type registry mechanism found herein will disappear in any V2 release.
-// The version in the reg package should be considered authoritative.
+// Changes in design and functionality will made to the reg package in the go-type project in the future.
+// Applicable bugs found in that project may be fixed here as well, but there is no guarantee.
+// The type registry mechanism found herein will disappear in any future V2 release.
+// The version in the go-type/reg package should be considered authoritative.
 //
-// There may also be some non-registry type related functionality in this package.
-// As of any V2 release this package will only contain that other non-registry functionality.
-//
-// See the reg package
+// See the reg package in go-type.
 package typeutils
