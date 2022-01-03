@@ -2,87 +2,69 @@ package text
 
 import (
 	"errors"
-	"fmt"
+	"math"
 	"strings"
-	"unicode"
 )
 
-var dollar = '$'
-var period = '.'
+const dollar = '$'
+const period = '.'
+const zero = '0'
+
 var multipleDecimalPoints = errors.New("multiple decimal points")
 
 // FormatUSD takes a string representation of a number,
-// decorates it with a preceding dollar sign, and inserts commas as required.
+// decorates it with a preceding dollar sign, inserts commas,
+// and adds trailing pennies as required.
 //
 // This is not intended to be a general purpose solution,
 // it is a stopgap until golang formalizes decimal and currency libraries.
 // In particular, shopspring/decimal.Decimal doesn't have formatting with embedded commas.
 // Formatting for decimal data (if/when added to Golang) may be in the text package.
-//
-// The current implementation isn't terribly efficient.
-// There may be a state-machine solution that checks through the number string in reverse.
 func FormatUSD(number string) (string, error) {
-	decimalFound := false
-	intPart := strings.Builder{}
-	intPart.Grow(len(number))
-	decPart := strings.Builder{}
-	decPart.Grow(len(number))
+	parts := strings.Split(number, string(period))
+	if len(parts) > 2 {
+		return number, multipleDecimalPoints
+	}
 
-	for _, c := range number {
-		if c == period {
-			if decimalFound {
-				// Can't have two dots
-				return "", multipleDecimalPoints
-			}
-			decimalFound = true
-		} else if !unicode.IsDigit(c) {
-			return "", fmt.Errorf("unknown numeric character '%c'", c)
-		} else if decimalFound {
-			decPart.WriteRune(c)
-		} else {
-			intPart.WriteRune(c)
+	var decPart string
+	intPart := parts[0]
+	if len(parts) > 1 {
+		decPart = parts[1]
+		if len(decPart) > 2 {
+			decPart = decPart[0:2]
 		}
 	}
 
 	result := strings.Builder{}
-	result.Grow(2 * len(number))
+	result.Grow(1 + len(intPart) + len(intPart)/3 + 1 + int(math.Min(float64(len(decPart)), 2)))
 	result.WriteRune(dollar)
 
-	var whole string
-	if intPart.Len() > 0 {
-		whole = intPart.String()
+	if intPart == "" {
+		result.WriteRune(zero)
 	} else {
-		whole = "0"
-	}
-
-	comma := false
-	if xtra := len(whole) % 3; xtra != 0 {
-		result.WriteString(whole[0:xtra])
-		whole = whole[xtra:]
-		comma = true
-	}
-
-	for len(whole) > 0 {
-		if comma {
-			result.WriteRune(',')
-		} else {
+		comma := false
+		if extra := len(intPart) % 3; extra != 0 {
+			result.WriteString(intPart[0:extra])
+			intPart = intPart[extra:]
 			comma = true
 		}
-		result.WriteString(whole[0:3])
-		whole = whole[3:]
+
+		for len(intPart) > 0 {
+			if comma {
+				result.WriteRune(',')
+			} else {
+				comma = true
+			}
+			result.WriteString(intPart[0:3])
+			intPart = intPart[3:]
+		}
 	}
 
-	var dec string
 	result.WriteRune(period)
-	if decimalFound {
-		dec = decPart.String()
-		if len(dec) > 2 {
-			dec = dec[0:2]
-		}
-		result.Write([]byte(dec))
-	}
-	for i := len(dec); i < 2; i++ {
-		result.WriteRune('0')
+
+	result.WriteString(decPart)
+	for i := len(decPart); i < 2; i++ {
+		result.WriteRune(zero)
 	}
 
 	return result.String(), nil
