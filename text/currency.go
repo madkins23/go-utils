@@ -16,10 +16,11 @@ var multipleDecimalPoints = errors.New("multiple decimal points")
 //
 // This is not intended to be a general purpose solution,
 // it is a stopgap until golang formalizes decimal and currency libraries.
+// In particular, shopspring/decimal.Decimal doesn't have formatting with embedded commas.
+// Formatting for decimal data (if/when added to Golang) may be in the text package.
 //
-// The current implementation is inefficient,
-// there is probably a state-machine solution
-// that checks through the number string in reverse.
+// The current implementation isn't terribly efficient.
+// There may be a state-machine solution that checks through the number string in reverse.
 func FormatUSD(number string) (string, error) {
 	decimalFound := false
 	intPart := strings.Builder{}
