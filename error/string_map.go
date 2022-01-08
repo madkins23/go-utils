@@ -2,6 +2,7 @@ package error
 
 // StringMapDetails interface provides a way to determine if an error has string details.
 type StringMapDetails interface {
+	error
 	DetailStringMap() map[string]string
 }
 
@@ -12,11 +13,16 @@ type errWithStringMap struct {
 }
 
 // NewErrorWithStringMap constructs an errWithStringMap object.
-func NewErrorWithStringMap(msg string, detail map[string]string) error {
+func NewErrorWithStringMap(msg string, detail map[string]string) StringMapDetails {
 	return &errWithStringMap{
 		msg:    msg,
 		detail: detail,
 	}
+}
+
+// NewErrorWithStringArrayDummy provides an empty error object for use with errors.As()
+func NewErrorWithStringMapDummy() StringMapDetails {
+	return NewErrorWithStringMap("", nil)
 }
 
 // Error() returns the error message without any of the error detail strings.

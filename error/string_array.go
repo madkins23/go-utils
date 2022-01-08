@@ -2,6 +2,7 @@ package error
 
 // StringArrayDetails interface provides a way to determine if an error has string details.
 type StringArrayDetails interface {
+	error
 	DetailStringArray() []string
 }
 
@@ -12,11 +13,16 @@ type errWithStringArray struct {
 }
 
 // NewErrorWithStringArray constructs an errWithStringArray object.
-func NewErrorWithStringArray(msg string, detail []string) error {
+func NewErrorWithStringArray(msg string, detail []string) StringArrayDetails {
 	return &errWithStringArray{
 		msg:    msg,
 		detail: detail,
 	}
+}
+
+// NewErrorWithStringArrayDummy provides an empty error object for use with errors.As()
+func NewErrorWithStringArrayDummy() StringArrayDetails {
+	return NewErrorWithStringArray("", nil)
 }
 
 // Error() returns the error message without any of the error detail strings.

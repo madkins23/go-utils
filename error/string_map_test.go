@@ -1,7 +1,9 @@
 package error
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,21 +37,49 @@ func TestErrorWithNullStringMapDetails(t *testing.T) {
 	assert.Equal(t, stringMapEmpty, errDetails.DetailStringMap())
 }
 
+func TestErrorAsStringMapDetails(t *testing.T) {
+	err1 := NewErrorWithStringMap(stringMapMsg, stringMapDetails)
+	require.Error(t, err1)
+	assert.Equal(t, stringMapMsg, err1.Error())
+	err2 := fmt.Errorf("wrapped: %w", err1)
+	require.Error(t, err2)
+	dummy := NewErrorWithStringMap("", nil)
+	require.Error(t, dummy)
+	require.True(t, errors.As(err2, &dummy))
+	assert.IsType(t, NewErrorWithStringMapDummy(), dummy)
+	assert.Equal(t, stringMapMsg, dummy.Error())
+	errDetails, ok := dummy.(StringMapDetails)
+	require.True(t, ok)
+	assert.Equal(t, stringMapDetails, errDetails.DetailStringMap())
+}
+
 func Example_stringMap() {
 	details := make(map[string]string, 3)
-	details["one"] = "alpha"
-	details["two"] = "bravo"
-	details["three"] = "charlie"
+	details["1"] = "alpha"
+	details["2"] = "bravo"
+	details["3"] = "charlie"
 	err := NewErrorWithStringMap("message", details)
-	fmt.Printf("Error: %s\n", err)
-	if withDetails, ok := err.(StringMapDetails); ok {
-		for _, det := range withDetails.DetailStringMap() {
-			fmt.Printf("       %s\n", det)
+	wrapped := fmt.Errorf("Wrapped: %w", err)
+	fmt.Printf("Error: %s\n", wrapped)
+	dummy := NewErrorWithStringMapDummy()
+	if errors.As(wrapped, &dummy) {
+		if withDetails, ok := err.(StringMapDetails); ok {
+			detailed := withDetails.DetailStringMap()
+			// Maps return keys/values in a deliberately random order,
+			// so we must get the keys, sort them, and then use them.
+			keys := make([]string, 0, len(detailed))
+			for k, _ := range detailed {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			for _, key := range keys {
+				fmt.Printf("       %s\n", detailed[key])
+			}
 		}
 	}
 
 	// Output:
-	// Error: message
+	// Error: Wrapped: message
 	//        alpha
 	//        bravo
 	//        charlie
