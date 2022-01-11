@@ -15,10 +15,10 @@ func (i *StringArray) String() string {
 	return "[" + strings.Join(*i, ",") + "]"
 }
 
-var splitter = regexp.MustCompile("\\s*,\\s*")
+var commaSplitter = regexp.MustCompile("\\s*,\\s*")
 
 // Set a value(s) into the array.
 func (i *StringArray) Set(value string) error {
-	*i = append(*i, splitter.Split(value, -1)...)
+	*i = append(*i, commaSplitter.Split(value, -1)...)
 	return nil
 }
