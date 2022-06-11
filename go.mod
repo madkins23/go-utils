@@ -3,7 +3,6 @@ module github.com/madkins23/go-utils
 go 1.14
 
 require (
-	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gertd/go-pluralize v0.1.7
 	github.com/kr/text v0.2.0 // indirect
@@ -14,5 +13,5 @@ require (
 	github.com/stretchr/testify v1.5.1
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.0
 )
