@@ -23,7 +23,7 @@ func TestErrorWithStringMapDetails(t *testing.T) {
 	err := NewErrorWithStringMap(stringMapMsg, stringMapDetails)
 	require.Error(t, err)
 	assert.Equal(t, stringMapMsg, err.Error())
-	errDetails, ok := err.(StringMapDetails)
+	errDetails, ok := err.(ErrorWithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapDetails, errDetails.DetailStringMap())
 }
@@ -32,7 +32,7 @@ func TestErrorWithNullStringMapDetails(t *testing.T) {
 	err := NewErrorWithStringMap(stringMapMsg, stringMapEmpty)
 	require.Error(t, err)
 	assert.Equal(t, stringMapMsg, err.Error())
-	errDetails, ok := err.(StringMapDetails)
+	errDetails, ok := err.(ErrorWithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapEmpty, errDetails.DetailStringMap())
 }
@@ -48,39 +48,43 @@ func TestErrorAsStringMapDetails(t *testing.T) {
 	require.True(t, errors.As(err2, &dummy))
 	assert.IsType(t, NewErrorWithStringMapDummy(), dummy)
 	assert.Equal(t, stringMapMsg, dummy.Error())
-	errDetails, ok := dummy.(StringMapDetails)
+	errDetails, ok := dummy.(ErrorWithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapDetails, errDetails.DetailStringMap())
 }
 
 func Example_stringMap() {
 	details := make(map[string]string, 3)
-	details["1"] = "alpha"
-	details["2"] = "bravo"
-	details["3"] = "charlie"
+	details["alpha"] = "detail1"
+	details["bravo"] = "detail two"
+	details["charlie"] = "detail the third"
 	err := NewErrorWithStringMap("message", details)
-	wrapped := fmt.Errorf("Wrapped: %w", err)
-	fmt.Printf("Error: %s\n", wrapped)
+	wrapped := fmt.Errorf("Error: %w", err)
+	fmt.Printf("%s\n", wrapped)
 	dummy := NewErrorWithStringMapDummy()
 	if errors.As(wrapped, &dummy) {
-		if withDetails, ok := err.(StringMapDetails); ok {
+		if withDetails, ok := err.(ErrorWithDetailMap); ok {
 			detailed := withDetails.DetailStringMap()
+			keyLen := 0
 			// Maps return keys/values in a deliberately random order,
 			// so we must get the keys, sort them, and then use them.
 			keys := make([]string, 0, len(detailed))
 			for k, _ := range detailed {
 				keys = append(keys, k)
+				if len(k) > keyLen {
+					keyLen = len(k)
+				}
 			}
 			sort.Strings(keys)
 			for _, key := range keys {
-				fmt.Printf("       %s\n", detailed[key])
+				fmt.Printf("  %*s: %s\n", keyLen, key, detailed[key])
 			}
 		}
 	}
 
 	// Output:
-	// Error: Wrapped: message
-	//        alpha
-	//        bravo
-	//        charlie
+	// Error: message
+	//     alpha: detail1
+	//     bravo: detail two
+	//   charlie: detail the third
 }

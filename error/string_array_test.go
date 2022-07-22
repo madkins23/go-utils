@@ -22,7 +22,7 @@ func TestErrorWithStringArrayDetails(t *testing.T) {
 	err := NewErrorWithStringArray(stringArrayMsg, stringArrayDetails)
 	require.Error(t, err)
 	assert.Equal(t, stringArrayMsg, err.Error())
-	errDetails, ok := err.(StringArrayDetails)
+	errDetails, ok := err.(ErrorWithDetailArray)
 	require.True(t, ok)
 	assert.Equal(t, stringArrayDetails, errDetails.DetailStringArray())
 }
@@ -31,7 +31,7 @@ func TestErrorWithNullStringArrayDetails(t *testing.T) {
 	err := NewErrorWithStringArray(stringArrayMsg, stringArrayEmpty)
 	require.Error(t, err)
 	assert.Equal(t, stringArrayMsg, err.Error())
-	errDetails, ok := err.(StringArrayDetails)
+	errDetails, ok := err.(ErrorWithDetailArray)
 	require.True(t, ok)
 	assert.Equal(t, stringArrayEmpty, errDetails.DetailStringArray())
 
@@ -48,7 +48,7 @@ func TestErrorAsStringArrayDetails(t *testing.T) {
 	require.True(t, errors.As(err2, &dummy))
 	assert.IsType(t, NewErrorWithStringArrayDummy(), dummy)
 	assert.Equal(t, stringArrayMsg, dummy.Error())
-	errDetails, ok := dummy.(StringArrayDetails)
+	errDetails, ok := dummy.(ErrorWithDetailArray)
 	require.True(t, ok)
 	assert.Equal(t, stringArrayDetails, errDetails.DetailStringArray())
 }
@@ -59,20 +59,22 @@ func Example_stringArray() {
 	details[1] = "bravo"
 	details[2] = "charlie"
 	err := NewErrorWithStringArray("message", details)
-	wrapped := fmt.Errorf("Wrapped: %w", err)
-	fmt.Printf("Error: %s\n", wrapped)
+	wrapped := fmt.Errorf("Error:   %w", err)
 	dummy := NewErrorWithStringArrayDummy()
 	if errors.As(wrapped, &dummy) {
-		if withDetails, ok := err.(StringArrayDetails); ok {
+		details := ""
+		if withDetails, ok := err.(ErrorWithDetailArray); ok {
 			for _, det := range withDetails.DetailStringArray() {
-				fmt.Printf("       %s\n", det)
+				if len(details) > 0 {
+					details += ", "
+				}
+				details += det
 			}
 		}
+		fmt.Printf("%s\nDetails: %s\n", wrapped, details)
 	}
 
 	// Output:
-	// Error: Wrapped: message
-	//        alpha
-	//        bravo
-	//        charlie
+	// Error:   message
+	// Details: alpha, bravo, charlie
 }
