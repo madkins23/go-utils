@@ -21,12 +21,25 @@ type ToMapFn func(from interface{}, to map[string]interface{}) error
 //
 // Deprecated: This functionality has been rewritten in madkins23/go-type
 type Registry interface {
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	Alias(alias string, example interface{}) error
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	Register(example interface{}) error
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	Make(name string) (interface{}, error)
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	NameFor(item interface{}) (string, error)
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	GenNames(item interface{}, aliased bool) (string, []string, error)
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	ConvertItemToMap(item interface{}) (map[string]interface{}, error)
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	CreateItemFromMap(in map[string]interface{}) (interface{}, error)
 }
 
@@ -37,7 +50,10 @@ type Registry interface {
 //
 // Deprecated: This functionality has been rewritten in madkins23/go-type
 type RegistryItem interface {
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	PushToMap(toMap map[string]interface{}) error
+
+	// Deprecated: This functionality has been rewritten in madkins23/go-type
 	PullFromMap(fromMap map[string]interface{}) error
 }
 
