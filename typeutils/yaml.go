@@ -11,10 +11,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// YamlBase something something
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 type YamlBase struct {
 	Registry
 }
 
+// NewYamlBase creates a new YamlBase.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func NewYamlBase(reg Registry) *YamlBase {
 	return &YamlBase{Registry: reg}
 }
@@ -22,6 +28,8 @@ func NewYamlBase(reg Registry) *YamlBase {
 //////////////////////////////////////////////////////////////////////////
 
 // LoadFromFile loads an item of a registered type from the specified YAML file.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (yb *YamlBase) LoadFromFile(fileName string) (item interface{}, finalErr error) {
 	reader, err := os.Open(fileName)
 	if err != nil {
@@ -41,6 +49,8 @@ func (yb *YamlBase) LoadFromFile(fileName string) (item interface{}, finalErr er
 }
 
 // LoadFromString loads an item of a registered type from a YAML string.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (yb *YamlBase) LoadFromString(source string) (interface{}, error) {
 	if nexus, err := yb.loadFromReadSeeker(strings.NewReader(source)); err != nil {
 		return nil, fmt.Errorf("load from readSeeker: %w", err)
@@ -53,6 +63,8 @@ func (yb *YamlBase) LoadFromString(source string) (interface{}, error) {
 // This could have been an io.Reader but it is necessary to 'parse' the data twice.
 // The first time is just a scan for the top-level object type.
 // After scanning partially through the stream it must be reset.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (yb *YamlBase) loadFromReadSeeker(reader io.ReadSeeker) (interface{}, error) {
 	if typeName, err := getYamlTypeNameAndReset(reader); err != nil {
 		return nil, fmt.Errorf("get YAML type name: %w", err)
@@ -68,6 +80,8 @@ func (yb *YamlBase) loadFromReadSeeker(reader io.ReadSeeker) (interface{}, error
 //////////////////////////////////////////////////////////////////////////
 
 // SaveToFile saves an item of a registered type to the specified YAML file.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (yb *YamlBase) SaveToFile(item interface{}, fileName string) (finalErr error) {
 	file, err := os.Create(fileName)
 	if err != nil {
@@ -87,6 +101,8 @@ func (yb *YamlBase) SaveToFile(item interface{}, fileName string) (finalErr erro
 }
 
 // SaveToString marshals an item of a registered type to a YAML string.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (yb *YamlBase) SaveToString(item interface{}) (string, error) {
 	builder := &strings.Builder{}
 

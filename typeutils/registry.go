@@ -18,6 +18,8 @@ type ToMapFn func(from interface{}, to map[string]interface{}) error
 // A type registry tracks specific types by name, a facility not native to Go.
 // A type name in the registry is made up of package path and local type name.
 // Aliases may be specified to shorten the path to manageable lengths.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 type Registry interface {
 	Alias(alias string, example interface{}) error
 	Register(example interface{}) error
@@ -32,6 +34,8 @@ type Registry interface {
 // A Registry will work with any kind of struct, but won't copy field data without this interface.
 // This is used by ConvertItemToMap and CreateItemFromMap (as called from marshal/unmarshal code).
 // Note that both methods must be provided for either to work.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 type RegistryItem interface {
 	PushToMap(toMap map[string]interface{}) error
 	PullFromMap(fromMap map[string]interface{}) error
@@ -41,6 +45,8 @@ type RegistryItem interface {
 // Registries created via this function are not safe for concurrent access,
 // manage this access or use NewRegistrar() to create a concurrent safe version.
 // Developers might be able to write more efficient concurrency code using Registry.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func NewRegistry() Registry {
 	return &registry{
 		byName:  make(map[string]*registration),
@@ -83,6 +89,8 @@ type registration struct {
 // Alias creates an alias to be used to shorten names.
 // Alias must exist prior to registering applicable types.
 // Redefining a pre-existing alias is an error.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) Alias(alias string, example interface{}) error {
 	if _, ok := reg.aliases[alias]; ok {
 		return fmt.Errorf("can't redefine alias %s", alias)
@@ -110,6 +118,8 @@ func (reg *registry) Alias(alias string, example interface{}) error {
 }
 
 // Register a type by providing an example object.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) Register(example interface{}) error {
 	// Get reflected type for example object.
 	exType := reflect.TypeOf(example)
@@ -165,6 +175,8 @@ func (reg *registry) Register(example interface{}) error {
 // GenNames creates the possible names for the type represented by the example object.
 // Returns the 'canonical' name, an optional array of aliased names per current aliases, and any error.
 // If the aliased argument is true a possibly empty array will be returned for the second argument otherwise nil.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) GenNames(example interface{}, aliased bool) (string, []string, error) {
 	// Initialize default name to full name with package and type.
 	name, err := genNameFromInterface(example)
@@ -197,6 +209,8 @@ func (reg *registry) GenNames(example interface{}, aliased bool) (string, []stri
 }
 
 // NameFor returns a name for the specified object.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) NameFor(item interface{}) (string, error) {
 	itemType := reflect.TypeOf(item)
 	if itemType.Kind() == reflect.Ptr {
@@ -213,6 +227,8 @@ func (reg *registry) NameFor(item interface{}) (string, error) {
 
 // Make creates a new instance of the example object with the specified name.
 // The new instance will be created with fields filled with zero values.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) Make(name string) (interface{}, error) {
 	item, found := reg.byName[name]
 	if !found {
@@ -224,6 +240,8 @@ func (reg *registry) Make(name string) (interface{}, error) {
 
 // ConvertItemToMap converts a registry typed item into a map for further processing.
 // If the item is not of a Registry type an error is returned.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{}, error) {
 	value := reflect.ValueOf(item)
 	if value.Kind() == reflect.Ptr {
@@ -256,6 +274,8 @@ func (reg *registry) ConvertItemToMap(item interface{}) (map[string]interface{},
 
 // CreateItemFromMap attempts to return a new item of the type specified in the map.
 // An error is returned if this is impossible.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (reg *registry) CreateItemFromMap(in map[string]interface{}) (interface{}, error) {
 	typeField, found := in[TypeField]
 	if !found {

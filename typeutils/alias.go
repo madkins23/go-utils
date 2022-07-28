@@ -8,6 +8,9 @@ type Alias struct {
 	registry Registry
 }
 
+// NewAlias creates a new Alias.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func NewAlias(registry Registry, alias string) *Alias {
 	return &Alias{
 		alias:    alias,
@@ -16,6 +19,9 @@ func NewAlias(registry Registry, alias string) *Alias {
 
 }
 
+// Register an alias using the specified example.
+//
+// Deprecated: This functionality has been rewritten in madkins23/go-type
 func (a *Alias) Register(example interface{}) error {
 	if !a.aliased {
 		fmt.Println("nar", a.alias)

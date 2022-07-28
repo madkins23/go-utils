@@ -4,7 +4,7 @@
 // which has been copied to the reg package.
 // The version here is the original.
 //
-// Changes in design and functionality will made to the reg package in the go-type project in the future.
+// Deprecated: Changes in design and functionality will made to the reg package in the go-type project in the future.
 // Applicable bugs found in that project may be fixed here as well, but there is no guarantee.
 // The type registry mechanism found herein will disappear in any future V2 release.
 // The version in the go-type/reg package should be considered authoritative.
