@@ -1,36 +1,44 @@
 package error
 
+// WithDetailMap interface provides a way to determine if an error has string details.
+type WithDetailMap interface {
+	error
+	DetailStringMap() map[string]string
+}
+
 // ErrorWithDetailMap interface provides a way to determine if an error has string details.
+//
+// Deprecated: Name begins with package name, use error.WithDetailArray instead.
 type ErrorWithDetailMap interface {
 	error
 	DetailStringMap() map[string]string
 }
 
-// errWithDetailMap combines an error with an extra map of strings representing error detail.
-type errWithDetailMap struct {
+// withDetailMap combines an error with an extra map of strings representing error detail.
+type withDetailMap struct {
 	msg    string
 	detail map[string]string
 }
 
-// NewErrorWithStringMap constructs an errWithStringMap object.
-func NewErrorWithStringMap(msg string, detail map[string]string) ErrorWithDetailMap {
-	return &errWithDetailMap{
+// NewErrorWithStringMap constructs an error with a map of strings representing error details.
+func NewErrorWithStringMap(msg string, detail map[string]string) WithDetailMap {
+	return &withDetailMap{
 		msg:    msg,
 		detail: detail,
 	}
 }
 
-// NewErrorWithStringArrayDummy provides an empty error object for use with errors.As()
-func NewErrorWithStringMapDummy() ErrorWithDetailMap {
+// NewErrorWithStringMapDummy provides an empty error object for use with errors.As()
+func NewErrorWithStringMapDummy() WithDetailMap {
 	return NewErrorWithStringMap("", nil)
 }
 
 // Error() returns the error message without any of the error detail strings.
-func (e *errWithDetailMap) Error() string {
+func (e *withDetailMap) Error() string {
 	return e.msg
 }
 
 // DetailStringMap returns the map of strings containing error detail.
-func (e *errWithDetailMap) DetailStringMap() map[string]string {
+func (e *withDetailMap) DetailStringMap() map[string]string {
 	return e.detail
 }

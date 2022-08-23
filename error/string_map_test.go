@@ -23,7 +23,7 @@ func TestErrorWithStringMapDetails(t *testing.T) {
 	err := NewErrorWithStringMap(stringMapMsg, stringMapDetails)
 	require.Error(t, err)
 	assert.Equal(t, stringMapMsg, err.Error())
-	errDetails, ok := err.(ErrorWithDetailMap)
+	errDetails, ok := err.(WithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapDetails, errDetails.DetailStringMap())
 }
@@ -32,7 +32,7 @@ func TestErrorWithNullStringMapDetails(t *testing.T) {
 	err := NewErrorWithStringMap(stringMapMsg, stringMapEmpty)
 	require.Error(t, err)
 	assert.Equal(t, stringMapMsg, err.Error())
-	errDetails, ok := err.(ErrorWithDetailMap)
+	errDetails, ok := err.(WithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapEmpty, errDetails.DetailStringMap())
 }
@@ -48,7 +48,7 @@ func TestErrorAsStringMapDetails(t *testing.T) {
 	require.True(t, errors.As(err2, &dummy))
 	assert.IsType(t, NewErrorWithStringMapDummy(), dummy)
 	assert.Equal(t, stringMapMsg, dummy.Error())
-	errDetails, ok := dummy.(ErrorWithDetailMap)
+	errDetails, ok := dummy.(WithDetailMap)
 	require.True(t, ok)
 	assert.Equal(t, stringMapDetails, errDetails.DetailStringMap())
 }
@@ -63,7 +63,7 @@ func Example_stringMap() {
 	fmt.Printf("%s\n", wrapped)
 	dummy := NewErrorWithStringMapDummy()
 	if errors.As(wrapped, &dummy) {
-		if withDetails, ok := err.(ErrorWithDetailMap); ok {
+		if withDetails, ok := err.(WithDetailMap); ok {
 			detailed := withDetails.DetailStringMap()
 			keyLen := 0
 			// Maps return keys/values in a deliberately random order,
