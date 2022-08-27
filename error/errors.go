@@ -2,6 +2,11 @@ package error
 
 import "errors"
 
+const (
+	deprecated      = "deprecated: "
+	toBeImplemented = "to be implemented: "
+)
+
 var notYetImplemented = errors.New("not yet implemented")
 
 func NotYetImplemented() error {
@@ -9,5 +14,9 @@ func NotYetImplemented() error {
 }
 
 func ToBeImplemented(name string) error {
-	return errors.New("to be implemented: " + name)
+	return errors.New(toBeImplemented + name)
+}
+
+func Deprecated(name string) error {
+	return errors.New(deprecated + name)
 }
