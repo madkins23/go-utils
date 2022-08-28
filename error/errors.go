@@ -5,6 +5,8 @@ import "errors"
 var notYetImplemented = errors.New("not yet implemented")
 
 // NotYetImplemented returns a generic TBD error.
+//
+// Deprecated in favor of msg.ErrNotImplemented.
 func NotYetImplemented() error {
 	return notYetImplemented
 }
@@ -15,11 +17,15 @@ const (
 )
 
 // ToBeImplemented returns a TBD error specifying the name of the unimplemented function or method.
+//
+// Deprecated in favor of msg.ErrNotImplemented.
 func ToBeImplemented(name string) error {
 	return errors.New(toBeImplemented + name)
 }
 
 // Deprecated returns a deprecation error specifying the name of the deprecated function or method.
+//
+// Deprecated in favor of msg.ErrDeprecated.
 func Deprecated(name string) error {
 	return errors.New(deprecated + name)
 }
