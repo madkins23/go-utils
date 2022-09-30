@@ -33,6 +33,9 @@ type ConsoleOrFile struct {
 // Setup opens the console log or log file as appropriate based on the object's fields.
 func (cof *ConsoleOrFile) Setup() error {
 	var err error
+	zerolog.TimestampFunc = func() time.Time {
+		return time.Now().Local()
+	}
 	if cof.Console {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 	} else if cof.logFile, err = os.OpenFile(cof.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666); err != nil {
