@@ -1,6 +1,7 @@
 package log
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -28,6 +29,12 @@ type ConsoleOrFile struct {
 	LogFile string
 	AsJSON  bool
 	logFile *os.File
+}
+
+func (cof *ConsoleOrFile) AddFlagsToSet(flags *flag.FlagSet) {
+	flags.BoolVar(&cof.Console, "console", false, "Direct log to console")
+	flags.StringVar(&cof.LogFile, "logFile", "/tmp/curate.log", "Path to log file")
+	flags.BoolVar(&cof.AsJSON, "logJSON", false, "Log output as JSON")
 }
 
 // Setup opens the console log or log file as appropriate based on the object's fields.
