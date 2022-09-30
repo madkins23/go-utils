@@ -27,24 +27,39 @@ type ConsoleOrFile struct {
 	Console bool
 	LogFile string
 	AsJSON  bool
+	logFile *os.File
 }
 
 // Setup opens the console log or log file as appropriate based on the object's fields.
 func (cof *ConsoleOrFile) Setup() error {
+	var err error
 	if cof.Console {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
-	} else if f, err := os.OpenFile(cof.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666); err != nil {
+	} else if cof.logFile, err = os.OpenFile(cof.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666); err != nil {
 		return fmt.Errorf("Log file creation: %w", err)
 	} else {
-		defer func() { _ = f.Close() }()
 		if cof.AsJSON {
-			log.Logger = log.Output(f)
+			log.Logger = log.Output(cof.logFile)
 		} else {
 			// Separate blocks of log statements for each run.
-			_, _ = fmt.Fprintln(f)
+			_, _ = fmt.Fprintln(cof.logFile)
 			// Use ConsoleWriter for readable text instead of JSON blocks.
-			log.Logger = log.Output(zerolog.ConsoleWriter{Out: f, TimeFormat: "15:04:05", NoColor: true})
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: cof.logFile, TimeFormat: "15:04:05", NoColor: true})
 		}
 	}
 	return nil
+}
+
+// Close any log file that may have been opened.
+func (cof *ConsoleOrFile) Close() error {
+	if cof.logFile != nil {
+		return cof.logFile.Close()
+	}
+	return nil
+}
+
+// CloseForDefer closes any log file that may have been opened.
+// Returns no error so this call is simpler to use within a defer statement.
+func (cof *ConsoleOrFile) CloseForDefer() {
+	_ = cof.Close()
 }
