@@ -13,9 +13,9 @@ func ExampleConsole() {
 }
 
 func ExampleConsoleOrFile() {
+	flags := flag.NewFlagSet("test", flag.ContinueOnError)
 	cof := ConsoleOrFile{}
-	flags := flag.NewFlagSet("gardepro", flag.ContinueOnError)
-	cof.AddFlagsToSet(flags)
+	cof.AddFlagsToSet(flags, "/tmp/console-or-file.log")
 	if err := flags.Parse([]string{"-console"}); err != nil {
 		if !errors.Is(err, flag.ErrHelp) {
 			fmt.Printf("Error parsing command line flags: %s", err)

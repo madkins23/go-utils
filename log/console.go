@@ -31,9 +31,10 @@ type ConsoleOrFile struct {
 	logFile *os.File
 }
 
-func (cof *ConsoleOrFile) AddFlagsToSet(flags *flag.FlagSet) {
+// AddFlagsToSet will add standard flags for configuring its fields to a pre-existing flag.FlagSet.
+func (cof *ConsoleOrFile) AddFlagsToSet(flags *flag.FlagSet, logFile string) {
 	flags.BoolVar(&cof.Console, "console", false, "Direct log to console")
-	flags.StringVar(&cof.LogFile, "logFile", "/tmp/curate.log", "Path to log file")
+	flags.StringVar(&cof.LogFile, "logFile", logFile, "Path to log file")
 	flags.BoolVar(&cof.AsJSON, "logJSON", false, "Log output as JSON")
 }
 
