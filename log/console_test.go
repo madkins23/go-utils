@@ -13,6 +13,20 @@ func ExampleConsole() {
 }
 
 func ExampleConsoleOrFile() {
+	cof := ConsoleOrFile{
+		Console: false,
+		LogFile: "/tmp/console-or-file.log",
+		AsJSON:  true,
+	}
+	if err := cof.Setup(); err != nil {
+		fmt.Printf("Log file creation error: %s", err)
+		return
+	}
+	defer cof.CloseForDefer()
+	// Output:
+}
+
+func ExampleConsoleOrFile_withFlags() {
 	flags := flag.NewFlagSet("test", flag.ContinueOnError)
 	cof := ConsoleOrFile{}
 	cof.AddFlagsToSet(flags, "/tmp/console-or-file.log")
