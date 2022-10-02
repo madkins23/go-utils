@@ -21,6 +21,7 @@ func Console() {
 }
 
 // ConsoleOrFile is used to open a console log or a log file based on its fields.
+// The log to be used is the default zerolog object.
 // If a log file is opened it may be specified as JSON objects
 // or the more readable console log format.
 // The fields should be set based on command line arguments.
@@ -33,9 +34,9 @@ type ConsoleOrFile struct {
 
 // AddFlagsToSet will add standard flags for configuring its fields to a pre-existing flag.FlagSet.
 func (cof *ConsoleOrFile) AddFlagsToSet(flags *flag.FlagSet, logFile string) {
-	flags.BoolVar(&cof.Console, "console", false, "Direct log to console")
-	flags.StringVar(&cof.LogFile, "logFile", logFile, "Path to log file")
-	flags.BoolVar(&cof.AsJSON, "logJSON", false, "Log output as JSON")
+	flags.BoolVar(&cof.Console, "console", false, "Log to the console instead of the specified log file")
+	flags.StringVar(&cof.LogFile, "logFile", logFile, "Log file path")
+	flags.BoolVar(&cof.AsJSON, "logJSON", false, "Log output to file as JSON objects")
 }
 
 // Setup opens the console log or log file as appropriate based on the object's fields.
