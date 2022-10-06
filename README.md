@@ -2,11 +2,11 @@
 
 Common Go packages shared by other Go projects.
 
-![GitHub](https://img.shields.io/github/license/madkins23/go-utils)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/madkins23/go-utils)
-
 See the [source](https://github.com/madkins23/go-utils)
 or [godoc](https://godoc.org/github.com/madkins23/go-utils) for more detailed documentation.
+
+![GitHub](https://img.shields.io/github/license/madkins23/go-utils)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/madkins23/go-utils)
 
 ## `array`
 
