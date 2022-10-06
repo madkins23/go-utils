@@ -2,6 +2,9 @@
 
 Common Go packages shared by other Go projects.
 
+![GitHub](https://img.shields.io/github/license/madkins23/go-utils)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/madkins23/go-utils)
+
 ### Caveats
 
 You are more than welcome to use this package as is but these are
