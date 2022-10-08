@@ -5,8 +5,10 @@ Common Go packages shared by other Go projects.
 See the [source](https://github.com/madkins23/go-utils)
 or [godoc](https://godoc.org/github.com/madkins23/go-utils) for more detailed documentation.
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/madkins23/go-utils)](https://goreportcard.com/report/github.com/madkins23/go-utils)
 ![GitHub](https://img.shields.io/github/license/madkins23/go-utils)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/madkins23/go-utils)
+[![Go Reference](https://pkg.go.dev/badge/github.com/madkins23/go-utils.svg)](https://pkg.go.dev/github.com/madkins23/go-utils)
 
 ## `array`
 

@@ -69,7 +69,7 @@ func Example_stringMap() {
 			// Maps return keys/values in a deliberately random order,
 			// so we must get the keys, sort them, and then use them.
 			keys := make([]string, 0, len(detailed))
-			for k, _ := range detailed {
+			for k := range detailed {
 				keys = append(keys, k)
 				if len(k) > keyLen {
 					keyLen = len(k)
