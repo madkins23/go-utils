@@ -20,6 +20,17 @@ func (b *ErrBlocked) Error() string {
 	}
 }
 
+// Is determines if the error is or contains the target error.
+func (b *ErrBlocked) Is(target error) bool {
+	if eb, ok := target.(*ErrBlocked); !ok {
+		return false
+	} else if eb.Name != "" {
+		return eb.Name == b.Name
+	} else {
+		return true
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 const strDeprecated = "deprecated"
@@ -40,6 +51,17 @@ func (d *ErrDeprecated) Error() string {
 	}
 }
 
+// Is determines if the error is or contains the target error.
+func (d *ErrDeprecated) Is(target error) bool {
+	if ed, ok := target.(*ErrDeprecated); !ok {
+		return false
+	} else if ed.Name != "" {
+		return ed.Name == d.Name
+	} else {
+		return true
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 const strNotImplementedYet = "not implemented yet"
@@ -57,5 +79,16 @@ func (ni *ErrNotImplemented) Error() string {
 		return strNotImplementedYet
 	} else {
 		return ni.Name + strNotImplementedNamed
+	}
+}
+
+// Is determines if the error is or contains the target error.
+func (ni *ErrNotImplemented) Is(target error) bool {
+	if eni, ok := target.(*ErrNotImplemented); !ok {
+		return false
+	} else if eni.Name != "" {
+		return eni.Name == ni.Name
+	} else {
+		return true
 	}
 }
