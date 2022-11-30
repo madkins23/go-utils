@@ -15,6 +15,7 @@ const (
 func TestConstError_Error(t *testing.T) {
 	const e = ConstError(msg)
 	assert.Equal(t, msg, e.Error())
+	assert.ErrorIs(t, ConstError(msg), e)
 }
 
 func TestErrBlocked(t *testing.T) {
