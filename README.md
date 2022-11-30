@@ -51,6 +51,14 @@ Path utilities.
 * `path.HomePath()` prepends a relative file path with the user's home directory.
   Works on linux and should work on Mac and Windows but untested by author.
 
+## 'server'
+
+Utilities for interacting with Golang HTTP servers.
+
+* `server.Interrupt` sends a `SIGINT` signal to the current process.
+* `server.IsReady` checks for immediate service of specified URL.
+* `server.WaitFor` waits for service to become available for specified timeout.
+
 ## `test`
 
 Test utilities.
