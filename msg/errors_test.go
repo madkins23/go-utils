@@ -7,7 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const name = "name"
+const (
+	msg  = "eMsg"
+	name = "name"
+)
+
+func TestConstError_Error(t *testing.T) {
+	const e = ConstError(msg)
+	assert.Equal(t, msg, e.Error())
+}
 
 func TestErrBlocked(t *testing.T) {
 	assert.Equal(t, strBlocked, (&ErrBlocked{}).Error())

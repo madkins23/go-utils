@@ -2,6 +2,17 @@ package msg
 
 //////////////////////////////////////////////////////////////////////////
 
+var _ error = ConstError("poop")
+
+// ConstError defines an Error type that can be a constant because it's really just a string.
+type ConstError string
+
+func (ce ConstError) Error() string {
+	return string(ce)
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 const strBlocked = "blocked"
 const strBlockedNamed = " is blocked"
 
