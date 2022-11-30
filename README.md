@@ -32,6 +32,18 @@ Logging utilities using [zerolog](https://github.com/rs/zerolog).
 * `log.Console` configures the default zerolog logger for readable format
   instead of the default JSON record output.
 
+## `msg`
+
+Error utilities.
+Putting them in a package named `error` or `errors` makes life difficult
+so the package is named `msg`.
+
+* `msg.ConstError` is a string type that implements the `error` interface.
+* several general-purpose error messages implemented as `struct` items:
+  * `msg.ErrBlocked`
+  * `msg.ErrDeprecated`
+  * `msg.ErrNotImplemented`
+
 ## `path`
 
 Path utilities.
