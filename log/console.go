@@ -24,11 +24,14 @@ func Console() {
 // The log to be used is the default zerolog object.
 // If a log file is opened it may be specified as JSON objects
 // or the more readable console log format.
-// The fields should be set based on command line arguments.
+//
+// This struct has been configured with JSON and YAML struct tags.
+// This supports reading the contents from a JSON or YAML configuration file.
+// The struct can also be embedded within a JSON or YAML configuration file.
 type ConsoleOrFile struct {
-	Console bool
-	LogFile string
-	AsJSON  bool
+	Console bool   `json:"console" yaml:"console"`
+	LogFile string `json:"logFile" yaml:"logFile"`
+	AsJSON  bool   `json:"asJson" yaml:"asJson"`
 	logFile *os.File
 }
 
@@ -48,7 +51,7 @@ func (cof *ConsoleOrFile) Setup() error {
 	if cof.Console {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 	} else if cof.logFile, err = os.OpenFile(cof.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666); err != nil {
-		return fmt.Errorf("Log file creation: %w", err)
+		return fmt.Errorf("log file creation: %w", err)
 	} else {
 		if cof.AsJSON {
 			log.Logger = log.Output(cof.logFile)
