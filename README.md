@@ -55,7 +55,7 @@ Path utilities.
   Works on linux and should work on Mac and Windows but untested by author.
   _This function has been deprecated in favor of `path.FixHomePath()`._
 
-## 'server'
+## `server`
 
 Utilities for interacting with Golang HTTP servers.
 
