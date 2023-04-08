@@ -35,7 +35,8 @@ type ConsoleOrFile struct {
 	logFile *os.File
 }
 
-// AddFlagsToSet will add standard flags for configuring its fields to a pre-existing flag.FlagSet.
+// AddFlagsToSet adds flags to the specified flag.FlagSet.
+// Each flag is connected to a field in the configuration object.
 func (cof *ConsoleOrFile) AddFlagsToSet(flags *flag.FlagSet, logFile string) {
 	flags.BoolVar(&cof.Console, "console", false, "Log to the console instead of the specified log file")
 	flags.StringVar(&cof.LogFile, "logFile", logFile, "Log file path")
