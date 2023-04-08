@@ -48,8 +48,12 @@ so the package is named `msg`.
 
 Path utilities.
 
+* `path.FixHomePath()` looks for a home directory string and replaces it with 
+  the absolute path to the home directory.
+  Works on linux and should work on Mac and Windows but untested by author.
 * `path.HomePath()` prepends a relative file path with the user's home directory.
   Works on linux and should work on Mac and Windows but untested by author.
+  _This function has been deprecated in favor of `path.FixHomePath()`._
 
 ## 'server'
 
