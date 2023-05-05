@@ -60,7 +60,7 @@ func (p *Periodic) handleSignals() {
 	}
 }
 
-// Execute cycle function on a regular interval.
+// Ticker executes a cycle function on a regular interval.
 // Uses a ticker to start the code at known intervals.
 // If the code runs longer than a ticker interval some intervals will be skipped.
 // The code is run initially, then the ticker is started.

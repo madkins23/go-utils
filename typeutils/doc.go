@@ -1,4 +1,4 @@
-// Utilities for working with types.
+// Package typeutils provides utilities for working with types.
 //
 // This package used to contain nothing but the type registry mechanism
 // which has been copied to the reg package.

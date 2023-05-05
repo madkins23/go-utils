@@ -52,41 +52,41 @@ var copyFnMissing = fmt.Errorf("no copy function")
 
 // Normally these would be more specific, but for testing purposes they are generic and weird.
 
-func (alf *alpha) PushToMap(toMap map[string]interface{}) error {
+func (a *alpha) PushToMap(toMap map[string]interface{}) error {
 	if copyMapFromItemFn != nil {
-		return copyMapFromItemFn(toMap, alf)
+		return copyMapFromItemFn(toMap, a)
 	} else if copyFn != nil {
-		return copyFn(toMap, alf)
+		return copyFn(toMap, a)
 	}
 
 	return copyFnMissing
 }
 
-func (alf *alpha) PullFromMap(fromMap map[string]interface{}) error {
+func (a *alpha) PullFromMap(fromMap map[string]interface{}) error {
 	if copyItemFromMapFn != nil {
-		return copyItemFromMapFn(alf, fromMap)
+		return copyItemFromMapFn(a, fromMap)
 	} else if copyFn != nil {
-		return copyFn(alf, fromMap)
+		return copyFn(a, fromMap)
 	}
 
 	return copyFnMissing
 }
 
-func (bra *bravo) PushToMap(toMap map[string]interface{}) error {
+func (b *bravo) PushToMap(toMap map[string]interface{}) error {
 	if copyMapFromItemFn != nil {
-		return copyMapFromItemFn(toMap, bra)
+		return copyMapFromItemFn(toMap, b)
 	} else if copyFn != nil {
-		return copyFn(toMap, bra)
+		return copyFn(toMap, b)
 	}
 
 	return copyFnMissing
 }
 
-func (bra *bravo) PullFromMap(fromMap map[string]interface{}) error {
+func (b *bravo) PullFromMap(fromMap map[string]interface{}) error {
 	if copyItemFromMapFn != nil {
-		return copyItemFromMapFn(bra, fromMap)
+		return copyItemFromMapFn(b, fromMap)
 	} else if copyFn != nil {
-		return copyFn(bra, fromMap)
+		return copyFn(b, fromMap)
 	}
 
 	return copyFnMissing

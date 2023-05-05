@@ -88,7 +88,7 @@ func runService(bad bool) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(status)
-			_, _ = w.Write([]byte("Data"))
+			_, _ = w.Write([]byte("Internal"))
 		}))
 }
 

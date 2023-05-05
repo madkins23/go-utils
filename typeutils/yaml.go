@@ -89,7 +89,7 @@ func (yb *YamlBase) SaveToFile(item interface{}, fileName string) (finalErr erro
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
-			finalErr = fmt.Errorf("Error closing source file: %w", err)
+			finalErr = fmt.Errorf("error closing source file: %w", err)
 		}
 	}()
 
