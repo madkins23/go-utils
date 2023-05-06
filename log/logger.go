@@ -7,8 +7,14 @@ import (
 
 // Logger returns the default zerolog logger.
 // It's kind of redundant but used by other functionality in this package.
+// Note: returns pointer to zerolog.Logger as opposed to copied item.
 func Logger() *zerolog.Logger {
 	return &log.Logger
+}
+
+// SetLogger sets the default zerolog logger to the specified logger value.
+func SetLogger(logger zerolog.Logger) {
+	log.Logger = logger
 }
 
 // Debug returns a debug event from the default zerolog logger.
