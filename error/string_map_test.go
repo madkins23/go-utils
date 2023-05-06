@@ -59,7 +59,7 @@ func Example_stringMap() {
 	details["bravo"] = "detail two"
 	details["charlie"] = "detail the third"
 	err := NewErrorWithStringMap("message", details)
-	wrapped := fmt.Errorf("Error: %w", err)
+	wrapped := fmt.Errorf("error: %w", err)
 	fmt.Printf("%s\n", wrapped)
 	dummy := NewErrorWithStringMapDummy()
 	if errors.As(wrapped, &dummy) {
@@ -83,7 +83,7 @@ func Example_stringMap() {
 	}
 
 	// Output:
-	// Error: message
+	// error: message
 	//     alpha: detail1
 	//     bravo: detail two
 	//   charlie: detail the third
