@@ -79,7 +79,7 @@ func (cof *ConsoleOrFile) Setup() error {
 		_, _ = fmt.Fprintln(cof.logFile)
 		// Use ConsoleWriter for readable text instead of JSON blocks.
 		cof.writer = &zerolog.ConsoleWriter{Out: cof.logFile, TimeFormat: "15:04:05", NoColor: true}
-		log.Output(cof.writer)
+		log.Logger = log.Output(cof.writer)
 	}
 	return nil
 }
