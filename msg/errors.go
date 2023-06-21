@@ -103,3 +103,34 @@ func (ni *ErrNotImplemented) Is(target error) bool {
 		return true
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+const strNotOverridden = "not overridden"
+const strNotOverriddenNamed = " must be overridden"
+
+// ErrNotOverridden is a custom error representing a method that must be overridden.
+type ErrNotOverridden struct {
+	// Optional name of function or method to be overridden.
+	Name string
+}
+
+// Error implements the predefined error interface.
+func (ni *ErrNotOverridden) Error() string {
+	if ni.Name == "" {
+		return strNotOverridden
+	} else {
+		return ni.Name + strNotOverriddenNamed
+	}
+}
+
+// Is determines if the error is or contains the target error.
+func (ni *ErrNotOverridden) Is(target error) bool {
+	if eni, ok := target.(*ErrNotOverridden); !ok {
+		return false
+	} else if eni.Name != "" {
+		return eni.Name == ni.Name
+	} else {
+		return true
+	}
+}

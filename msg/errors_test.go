@@ -47,3 +47,13 @@ func TestErrNotImplemented(t *testing.T) {
 	assert.False(t, errors.Is(&ErrNotImplemented{}, &ErrNotImplemented{Name: "test"}), "specific fail")
 	assert.False(t, errors.Is(&ErrNotImplemented{Name: "fail"}, &ErrNotImplemented{Name: "test"}), "mismatch fail")
 }
+
+func TestErrNotOverridden(t *testing.T) {
+	assert.Equal(t, strNotOverridden, (&ErrNotOverridden{}).Error())
+	assert.Equal(t, name+strNotOverriddenNamed, (&ErrNotOverridden{name}).Error())
+	assert.ErrorIs(t, &ErrNotOverridden{}, &ErrNotOverridden{})
+	assert.ErrorIs(t, &ErrNotOverridden{Name: "test"}, &ErrNotOverridden{Name: "test"}, "exact match")
+	assert.ErrorIs(t, &ErrNotOverridden{Name: "test"}, &ErrNotOverridden{}, "generic match")
+	assert.False(t, errors.Is(&ErrNotOverridden{}, &ErrNotOverridden{Name: "test"}), "specific fail")
+	assert.False(t, errors.Is(&ErrNotOverridden{Name: "fail"}, &ErrNotOverridden{Name: "test"}), "mismatch fail")
+}
