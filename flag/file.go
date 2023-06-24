@@ -11,11 +11,6 @@ import (
 	"github.com/madkins23/go-utils/path"
 )
 
-const (
-	SettingsFlag  = "settings"
-	SettingsUsage = "Optional JSON file with flag defaults"
-)
-
 // LoadSettings overrides default values in the specified flag.FlagSet with
 // values taken from a settings file specified as '@<path>' on the command line.
 // The settings file specification is removed from os.Args by this function.
