@@ -16,19 +16,35 @@ func TestLoadSettings(t *testing.T) {
 		whole int
 		float float64
 	)
-	flagSet := flag.NewFlagSet("example", flag.ContinueOnError)
-	flagSet.StringVar(&text, "text", "Lorem Ipsum", "Text String")
-	flagSet.IntVar(&whole, "whole", 13, "Integer")
-	flagSet.Float64Var(&float, "float", 1.61803, "Floating point")
 
 	// Original defaults when no settings file or flags:
+	flagSet := makeFlagSet(&text, &whole, &float)
 	require.NoError(t, flagSet.Parse([]string{}))
 	assert.Equal(t, "Lorem Ipsum", text)
 	assert.Equal(t, 13, whole)
 	assert.Equal(t, 1.61803, float)
 
 	// Add the settings file to the command line arguments.
-	os.Args = []string{"path", "@testdata/settings.json"}
+	os.Args = []string{
+		"path",
+		"@testdata/settings.cfg",
+	}
+	flagSet = makeFlagSet(&text, &whole, &float)
+	require.NoError(t, LoadSettings(flagSet))
+
+	// Settings override defaults:
+	require.NoError(t, flagSet.Parse(os.Args[1:]))
+	assert.Equal(t, "Forgotten!", text)
+	assert.Equal(t, 17, whole)
+	assert.Equal(t, 1.61803, float)
+
+	// Add two settings files to the command line arguments.
+	os.Args = []string{
+		"path",
+		"@testdata/settings.cfg",
+		"@testdata/settings.json",
+	}
+	flagSet = makeFlagSet(&text, &whole, &float)
 	require.NoError(t, LoadSettings(flagSet))
 
 	// Settings override defaults:
@@ -39,11 +55,14 @@ func TestLoadSettings(t *testing.T) {
 
 	// Use the settings file And the command line arguments.
 	os.Args = []string{
-		"path", "@testdata/settings.json",
+		"path",
+		"@testdata/settings.cfg",
+		"@testdata/settings.json",
 		"-text", "Read Me!",
 		"-whole", "23",
 		"-float", "3.14159",
 	}
+	flagSet = makeFlagSet(&text, &whole, &float)
 	require.NoError(t, LoadSettings(flagSet))
 
 	// Flags override settings and/or defaults:
@@ -51,6 +70,14 @@ func TestLoadSettings(t *testing.T) {
 	assert.Equal(t, "Read Me!", text)
 	assert.Equal(t, 23, whole)
 	assert.Equal(t, 3.14159, float)
+}
+
+func makeFlagSet(text *string, whole *int, float *float64) *flag.FlagSet {
+	flagSet := flag.NewFlagSet("example", flag.ContinueOnError)
+	flagSet.StringVar(text, "text", "Lorem Ipsum", "Text String")
+	flagSet.IntVar(whole, "whole", 13, "Integer")
+	flagSet.Float64Var(float, "float", 1.61803, "Floating point")
+	return flagSet
 }
 
 func TestLoadSettings_badPath(t *testing.T) {
