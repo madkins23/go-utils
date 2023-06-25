@@ -18,8 +18,12 @@ func TestLoadSettings(t *testing.T) {
 	)
 
 	// Original defaults when no settings file or flags:
+	os.Args = []string{
+		"path",
+	}
 	flagSet := makeFlagSet(&text, &whole, &float)
-	require.NoError(t, flagSet.Parse([]string{}))
+	require.NoError(t, LoadSettings(flagSet))
+	require.NoError(t, flagSet.Parse(os.Args[1:]))
 	assert.Equal(t, "Lorem Ipsum", text)
 	assert.Equal(t, 13, whole)
 	assert.Equal(t, 1.61803, float)
@@ -31,11 +35,21 @@ func TestLoadSettings(t *testing.T) {
 	}
 	flagSet = makeFlagSet(&text, &whole, &float)
 	require.NoError(t, LoadSettings(flagSet))
-
-	// Settings override defaults:
 	require.NoError(t, flagSet.Parse(os.Args[1:]))
 	assert.Equal(t, "Forgotten!", text)
 	assert.Equal(t, 17, whole)
+	assert.Equal(t, 1.61803, float)
+
+	// Add the settings file with hyphen prefixes to the command line arguments.
+	os.Args = []string{
+		"path",
+		"@testdata/settings-flags.cfg",
+	}
+	flagSet = makeFlagSet(&text, &whole, &float)
+	require.NoError(t, LoadSettings(flagSet))
+	require.NoError(t, flagSet.Parse(os.Args[1:]))
+	assert.Equal(t, "Nevermore!", text)
+	assert.Equal(t, 63, whole)
 	assert.Equal(t, 1.61803, float)
 
 	// Add two settings files to the command line arguments.
@@ -46,12 +60,23 @@ func TestLoadSettings(t *testing.T) {
 	}
 	flagSet = makeFlagSet(&text, &whole, &float)
 	require.NoError(t, LoadSettings(flagSet))
-
-	// Settings override defaults:
 	require.NoError(t, flagSet.Parse(os.Args[1:]))
 	assert.Equal(t, "Don't Look!", text)
 	assert.Equal(t, 17, whole)
 	assert.Equal(t, 2.71828, float)
+
+	// Add two settings files with hyphen prefixes like flags to the command line arguments.
+	os.Args = []string{
+		"path",
+		"@testdata/settings-flags.cfg",
+		"@testdata/settings-flags.json",
+	}
+	flagSet = makeFlagSet(&text, &whole, &float)
+	require.NoError(t, LoadSettings(flagSet))
+	require.NoError(t, flagSet.Parse(os.Args[1:]))
+	assert.Equal(t, "Infinity!", text)
+	assert.Equal(t, 63, whole)
+	assert.Equal(t, 1.41421, float)
 
 	// Use the settings file And the command line arguments.
 	os.Args = []string{
@@ -64,8 +89,6 @@ func TestLoadSettings(t *testing.T) {
 	}
 	flagSet = makeFlagSet(&text, &whole, &float)
 	require.NoError(t, LoadSettings(flagSet))
-
-	// Flags override settings and/or defaults:
 	require.NoError(t, flagSet.Parse(os.Args[1:]))
 	assert.Equal(t, "Read Me!", text)
 	assert.Equal(t, 23, whole)

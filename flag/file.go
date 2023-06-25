@@ -69,6 +69,9 @@ func loadSettingsFile(flagSet *flag.FlagSet, file string) error {
 
 	errs := make([]error, 0)
 	for key, value := range settings {
+		for strings.HasPrefix(key, "-") {
+			key = key[1:]
+		}
 		if flg := flagSet.Lookup(key); flg == nil {
 			errs = append(errs, fmt.Errorf("setting referenced non-existent flag '%s'", key))
 		} else {
