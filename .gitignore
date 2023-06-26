@@ -13,3 +13,6 @@
 
 # GoLand
 .idea
+
+# VIM
+*.swp

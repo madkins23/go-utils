@@ -1,6 +1,8 @@
 package error
 
 // WithDetailArray interface provides a way to determine if an error has string details.
+//
+// Deprecated: Use Go package errors.Join() instead.
 type WithDetailArray interface {
 	error
 	DetailStringArray() []string
@@ -21,6 +23,8 @@ type withDetailArray struct {
 }
 
 // NewErrorWithStringArray constructs an error with an array of string details.
+//
+// Deprecated: Use Go package errors.Join() instead.
 func NewErrorWithStringArray(msg string, detail []string) WithDetailArray {
 	return &withDetailArray{
 		msg:    msg,
@@ -29,6 +33,8 @@ func NewErrorWithStringArray(msg string, detail []string) WithDetailArray {
 }
 
 // NewErrorWithStringArrayDummy provides an empty error object for use with errors.As()
+//
+// Deprecated: Use Go package errors.Join() instead.
 func NewErrorWithStringArrayDummy() WithDetailArray {
 	return NewErrorWithStringArray("", nil)
 }

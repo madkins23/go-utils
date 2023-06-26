@@ -10,11 +10,26 @@ or [godoc](https://godoc.org/github.com/madkins23/go-utils) for more detailed do
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/madkins23/go-utils)
 [![Go Reference](https://pkg.go.dev/badge/github.com/madkins23/go-utils.svg)](https://pkg.go.dev/github.com/madkins23/go-utils)
 
+## `app`
+
+Application utilities.
+
+* `app.Terminator` provides support for "graceful" shutdown.
+* `app.HandleSignals` invokes a `SignalHandler` when one of the specified
+  OS signals is invoked.
+* `app.HandleTerminalSignals` invokes a `SignalHandler` when an OS signal
+  that normally causes application termination is invoked.
+
 ## `array`
 
 Array utilities.
 
 * `array.StringElementsMatch()` compares two arrays to see if they match irrespective of order.
+
+## `check`
+
+* `check.IsZero()` and `check.ErrorIfZero()` use reflection to check if an entity
+  has the zero value for its type.
 
 ## `cycle`
 
@@ -22,6 +37,21 @@ Periodic code execution.
 
 * `cycle.Periodic` type provides a mechanism for cyclically executing code.
 * `Periodic.Ticker` executes code at specified intervals.
+
+## `error`
+
+**Deprecated**
+
+Badly named package has been replaced by features in the `msg` package
+and the new-ish Go package feature `errors.Join()`.
+
+## `flag`
+
+Extend argument parsing behavior.
+
+* `flag.LoadSettings()` parses flag configuration files.
+* `flag.StringMap` defines a flag that can be invoked multiple times with values accumulated in a map.
+* `flag.StringArray` defines a flag that can be invoked multiple times with values accumulated in an array.
 
 ## `log`
 
