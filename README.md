@@ -38,6 +38,13 @@ Periodic code execution.
 * `cycle.Periodic` type provides a mechanism for cyclically executing code.
 * `Periodic.Ticker` executes code at specified intervals.
 
+## `csv`
+
+Wrapper around `encoding/csv.Reader` to provide:
+
+* header-aware processing and
+* map object result (header -> value).
+
 ## `error`
 
 **Deprecated**

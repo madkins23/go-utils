@@ -23,6 +23,7 @@ const errNoFieldNames msg.ConstError = "no field names provided"
 // NewReader creates a new CSV reader object.
 // The fieldNames argument is required and must not be nil or empty.
 // If no field names are available it is better to use encoding/csv.Reader directly.
+// The wrapped encode/csv.Reader field is visible so its settings can be changed.
 func NewReader(r io.Reader, fieldNames []string) (*Reader, error) {
 	if fieldNames == nil || len(fieldNames) < 1 {
 		return nil, errNoFieldNames
@@ -96,6 +97,7 @@ func (r *Reader) Read() (record map[string]string, err error) {
 			r.firstLine = false
 		}
 
+		// TODO: Add reuse record flag to this object.
 		result := make(map[string]string)
 		for i, v := range fields {
 			result[r.fieldNames[i]] = v
