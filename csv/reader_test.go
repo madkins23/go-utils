@@ -102,6 +102,10 @@ func TestReader(t *testing.T) {
 	assert.Equal(t, "1", row["alpha"])
 	assert.Equal(t, "3", row["bravo"])
 	assert.Equal(t, "5", row["charlie"])
+	row, err = reader.Read()
+	assert.ErrorContains(t, err, "read CSV line")
+	assert.ErrorAs(t, err, &io.EOF)
+	assert.Nil(t, row)
 }
 
 func TestReader_Read_justHeader(t *testing.T) {

@@ -102,7 +102,7 @@ func (r *Reader) FieldName(index int) (string, error) {
 func (r *Reader) Read() (map[string]string, error) {
 	fields, err := r.Reader.Read()
 	if err != nil {
-		return nil, fmt.Errorf("read CVS line: %w", err)
+		return nil, fmt.Errorf("read CSV line: %w", err)
 	}
 
 	// TODO: Add reuse record flag to this object.
