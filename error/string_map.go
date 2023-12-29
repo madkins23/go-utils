@@ -2,7 +2,7 @@ package error
 
 // WithDetailMap interface provides a way to determine if an error has string details.
 //
-// Deprecated: Use Go package errors.Join() instead.
+// Deprecated: No obvious replacement.
 type WithDetailMap interface {
 	error
 	DetailStringMap() map[string]string
@@ -10,7 +10,7 @@ type WithDetailMap interface {
 
 // ErrorWithDetailMap interface provides a way to determine if an error has string details.
 //
-// Deprecated: Name begins with package name, use error.WithDetailArray instead.
+// Deprecated: No obvious replacement.
 type ErrorWithDetailMap interface {
 	error
 	DetailStringMap() map[string]string
@@ -24,7 +24,7 @@ type withDetailMap struct {
 
 // NewErrorWithStringMap constructs an error with a map of strings representing error details.
 //
-// Deprecated: Use Go package errors.Join() instead.
+// Deprecated: No obvious replacement.
 func NewErrorWithStringMap(msg string, detail map[string]string) WithDetailMap {
 	return &withDetailMap{
 		msg:    msg,
@@ -34,7 +34,7 @@ func NewErrorWithStringMap(msg string, detail map[string]string) WithDetailMap {
 
 // NewErrorWithStringMapDummy provides an empty error object for use with errors.As()
 //
-// Deprecated: Use Go package errors.Join() instead.
+// Deprecated: No obvious replacement.
 func NewErrorWithStringMapDummy() WithDetailMap {
 	return NewErrorWithStringMap("", nil)
 }
