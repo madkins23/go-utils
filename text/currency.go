@@ -13,7 +13,7 @@ func FormatUSD(number string) (string, error) {
 		prefix = "-$"
 		number = number[1:]
 	}
-	if separated, err := AddNumericSeparators(number, ','); err != nil {
+	if separated, err := addNumericSeparators(number, ',', 2, 2); err != nil {
 		return "", fmt.Errorf("add comma separators: %w", err)
 	} else {
 		return prefix + separated, nil
