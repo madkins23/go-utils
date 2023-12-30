@@ -30,4 +30,7 @@ func testFormatUSD(t *testing.T, expected, number string) {
 	formatted, err := FormatUSD(number)
 	require.NoError(t, err)
 	assert.Equal(t, expected, formatted)
+	formatted, err = FormatUSD("-" + number)
+	require.NoError(t, err)
+	assert.Equal(t, "-"+expected, formatted)
 }

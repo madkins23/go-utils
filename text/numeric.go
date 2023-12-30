@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	minus  = '-'
 	period = '.'
 	zero   = '0'
 )
@@ -17,6 +18,12 @@ var multipleDecimalPoints msg.ConstError = "multiple decimal points"
 // AddNumericSeparators takes a string representation of a number,
 // inserts the specified separator character and adds trailing decimal data as required.
 func AddNumericSeparators(number string, separator rune) (string, error) {
+	prefix := ""
+	if len(number) > 0 && number[0] == minus {
+		prefix = "-"
+		number = number[1:]
+	}
+
 	parts := strings.Split(number, string(period))
 	if len(parts) > 2 {
 		return number, multipleDecimalPoints
@@ -62,5 +69,5 @@ func AddNumericSeparators(number string, separator rune) (string, error) {
 		result.WriteRune(zero)
 	}
 
-	return result.String(), nil
+	return prefix + result.String(), nil
 }

@@ -30,4 +30,7 @@ func testAddNumericSeparators(t *testing.T, expected, number string) {
 	formatted, err := AddNumericSeparators(number, ',')
 	require.NoError(t, err)
 	assert.Equal(t, expected, formatted)
+	formatted, err = AddNumericSeparators("-"+number, ',')
+	require.NoError(t, err)
+	assert.Equal(t, "-"+expected, formatted)
 }
