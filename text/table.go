@@ -32,6 +32,10 @@ type ColumnDef struct {
 	// For columns after the first specifies that the vertical separator
 	// character before the column should be double rather than single.
 	Double bool
+
+	// Specify alignment of column header and row contents if Format is not specified.
+	// By default strings alight to the right.
+	AlignLeft bool
 }
 
 // TableDef defines a table.
@@ -64,7 +68,7 @@ func (td *TableDef) HeaderFormat() string {
 			} else {
 				started = true
 			}
-			builder.WriteString(fmt.Sprintf("%%%ds", column.Width))
+			builder.WriteString(column.headerFormat())
 		}
 
 		builder.WriteByte(newLine)
@@ -123,11 +127,7 @@ func (td *TableDef) RowFormat() string {
 			} else {
 				started = true
 			}
-			if column.Format == "" {
-				builder.WriteString(fmt.Sprintf("%%%ds", column.Width))
-			} else {
-				builder.WriteString(column.Format)
-			}
+			builder.WriteString(column.dataFormat())
 		}
 
 		builder.WriteByte(newLine)
@@ -139,11 +139,26 @@ func (td *TableDef) RowFormat() string {
 
 func (td *TableDef) newBuilder() *strings.Builder {
 	var builder strings.Builder
-	//var started bool
 
 	if td.Prefix != "" {
 		builder.WriteString(td.Prefix)
 	}
 
 	return &builder
+}
+
+func (c *ColumnDef) dataFormat() string {
+	if c.Format != "" {
+		return c.Format
+	} else {
+		return c.headerFormat()
+	}
+}
+
+func (c *ColumnDef) headerFormat() string {
+	if c.AlignLeft {
+		return fmt.Sprintf("%%-%ds", c.Width)
+	} else {
+		return fmt.Sprintf("%%%ds", c.Width)
+	}
 }

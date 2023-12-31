@@ -16,18 +16,9 @@ type TableTestSuite struct {
 func (suite *TableTestSuite) SetupTest() {
 	suite.tableDef = &TableDef{
 		Columns: []ColumnDef{
-			{
-				Width: 4,
-			},
-			{
-				Width:  10,
-				Format: "%10d",
-			},
-			{
-				Width:  8,
-				Format: "%8f",
-				Double: true,
-			},
+			{Width: 5, AlignLeft: true},
+			{Width: 10, Format: "%10d"},
+			{Width: 8, Format: "%8f", Double: true},
 		},
 		Prefix: "> ",
 	}
@@ -38,32 +29,23 @@ func TestExampleTestSuite(t *testing.T) {
 }
 
 func (suite *TableTestSuite) TestTable_Header() {
-	assert.Equal(suite.T(), "> %4s │ %10s ║ %8s\n", suite.tableDef.HeaderFormat())
+	assert.Equal(suite.T(), "> %-5s │ %10s ║ %8s\n", suite.tableDef.HeaderFormat())
 }
 
 func (suite *TableTestSuite) TestTable_Divider() {
-	assert.Equal(suite.T(), "> ─────┼────────────╫─────────", suite.tableDef.DividerString())
+	assert.Equal(suite.T(), "> ──────┼────────────╫─────────", suite.tableDef.DividerString())
 }
 
 func (suite *TableTestSuite) TestTable_Row() {
-	assert.Equal(suite.T(), "> %4s │ %10d ║ %8f\n", suite.tableDef.RowFormat())
+	assert.Equal(suite.T(), "> %-5s │ %10d ║ %8f\n", suite.tableDef.RowFormat())
 }
 
 func ExampleTableDef() {
 	tableDef := &TableDef{
 		Columns: []ColumnDef{
-			{
-				Width: 4,
-			},
-			{
-				Width:  10,
-				Format: "%10d",
-			},
-			{
-				Width:  8,
-				Format: "%8f",
-				Double: true,
-			},
+			{Width: 5, AlignLeft: true},
+			{Width: 10, Format: "%10d"},
+			{Width: 8, Format: "%8f", Double: true},
 		},
 		Prefix: "> ",
 	}
@@ -72,7 +54,7 @@ func ExampleTableDef() {
 	fmt.Println(tableDef.DividerString())
 	fmt.Printf(tableDef.RowFormat(), "x", 3, 4.5)
 
-	// Output: > name │      count ║    float
-	//> ─────┼────────────╫─────────
-	//>    x │          3 ║ 4.500000
+	// Output: > name  │      count ║    float
+	//> ──────┼────────────╫─────────
+	//> x     │          3 ║ 4.500000
 }
