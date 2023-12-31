@@ -117,6 +117,13 @@ Text utilities.
 * `text.Pluralize()` makes a word singular or plural based on the specified count.
   Calls through to `github.com/gertd/go-pluralize` with hidden global pluralizer
   and simplified calling convention.
+* `text.AddNumericSeparators` adds separators (commas or whatever)
+  every three digits in the integer part of a number.
+* `text.FormatUSD()` invokes `text.AddNumericSeparators` and adds a dollar sign prefix.
+* `text.TableDef` defines a simple table structure that can be used to generate:
+  * a format string for the header row of the table,
+  * a divider string for use below the header or in between table sections, and
+  * a format string for the data rows of the table.
 
 ## `typeutils`
 
