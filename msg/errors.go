@@ -1,5 +1,7 @@
 package msg
 
+import "errors"
+
 //////////////////////////////////////////////////////////////////////////
 
 var _ error = ConstError("poop")
@@ -33,7 +35,8 @@ func (b *ErrBlocked) Error() string {
 
 // Is determines if the error is or contains the target error.
 func (b *ErrBlocked) Is(target error) bool {
-	if eb, ok := target.(*ErrBlocked); !ok {
+	var eb *ErrBlocked
+	if !errors.As(target, &eb) {
 		return false
 	} else if eb.Name != "" {
 		return eb.Name == b.Name
@@ -64,7 +67,8 @@ func (d *ErrDeprecated) Error() string {
 
 // Is determines if the error is or contains the target error.
 func (d *ErrDeprecated) Is(target error) bool {
-	if ed, ok := target.(*ErrDeprecated); !ok {
+	var ed *ErrDeprecated
+	if !errors.As(target, &ed) {
 		return false
 	} else if ed.Name != "" {
 		return ed.Name == d.Name
@@ -95,7 +99,8 @@ func (ni *ErrNotImplemented) Error() string {
 
 // Is determines if the error is or contains the target error.
 func (ni *ErrNotImplemented) Is(target error) bool {
-	if eni, ok := target.(*ErrNotImplemented); !ok {
+	var eni *ErrNotImplemented
+	if !errors.As(target, &eni) {
 		return false
 	} else if eni.Name != "" {
 		return eni.Name == ni.Name
@@ -126,10 +131,11 @@ func (ni *ErrNotOverridden) Error() string {
 
 // Is determines if the error is or contains the target error.
 func (ni *ErrNotOverridden) Is(target error) bool {
-	if eni, ok := target.(*ErrNotOverridden); !ok {
+	var eno *ErrNotOverridden
+	if !errors.As(target, &eno) {
 		return false
-	} else if eni.Name != "" {
-		return eni.Name == ni.Name
+	} else if eno.Name != "" {
+		return eno.Name == ni.Name
 	} else {
 		return true
 	}
